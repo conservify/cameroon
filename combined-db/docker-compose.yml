@@ -1,0 +1,12 @@
+version: '2'
+services:
+  postgres:
+    image: mdillon/postgis:9.6-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=lora-combined
+      - POSTGRES_PASSWORD=asdfasdf
+      - POSTGRES_DB=lora-combined
+    volumes:
+      - ./schema:/docker-entrypoint-initdb.d/:ro
