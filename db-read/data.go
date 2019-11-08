@@ -1,5 +1,10 @@
 package main
 
+import (
+	"encoding/hex"
+	"time"
+)
+
 /**
 create table device_up (
 	id uuid primary key,
@@ -20,6 +25,17 @@ create table device_up (
 );
 */
 type DeviceUp struct {
+	ID            string    `db:"id"`
+	ReceivedAt    time.Time `db:"received_at"`
+	DeviceEUI     []byte    `db:"dev_eui"`
+	UplinkCounter int64     `db:"f_cnt"`
+	Port          int64     `db:"f_port"`
+	Data          []byte    `db:"data"`
+	Object        string    `db:"object"`
+}
+
+func (d *DeviceUp) DeviceEUIAsString() string {
+	return hex.EncodeToString(d.DeviceEUI)
 }
 
 /*
