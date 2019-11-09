@@ -66,7 +66,7 @@ type MainLoraRecordReceiver struct {
 }
 
 func (lrr *MainLoraRecordReceiver) HandleLoraRecord(u *DeviceUp, record *pb.LoraRecord) error {
-	log.Printf("%v %v %v", u.ID, u.DeviceEUIAsString(), record)
+	log.Printf("%v %v %v", u.ReceivedAt.Format("2006/0102 15:04:05"), u.DeviceEUIAsString(), record)
 	return nil
 }
 
