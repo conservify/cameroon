@@ -28,7 +28,7 @@ class CalibratedTouchEvents:
                         self.mouse_down = True
                     elif self.mouse_pos and self.mouse_pos != screen_pos:
                         evs.append(pygame.event.Event(
-                            pygame.MOUSEMOTION, buttons=(1, 0, 0), pos=screen_pos, rel=(screen_pos[0]-self.mouse_pos[0], screen_pos[1]-self.mouse_pos[1])
+                            pygame.MOUSEMOTION, buttons=(1, 0, 0), pos=screen_pos, rel=(screen_pos[0] - self.mouse_pos[0], screen_pos[1] - self.mouse_pos[1])
                         ))
                 self.mouse_pos = screen_pos
                 pygame.mouse.set_pos(*screen_pos)
