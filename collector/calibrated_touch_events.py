@@ -31,6 +31,6 @@ class CalibratedTouchEvents:
                             pygame.MOUSEMOTION, buttons=(1, 0, 0), pos=screen_pos, rel=(screen_pos[0] - self.mouse_pos[0], screen_pos[1] - self.mouse_pos[1])
                         ))
                 self.mouse_pos = screen_pos
-                pygame.mouse.set_pos(*screen_pos)
+                #pygame.mouse.set_pos(*screen_pos)
 
         return evs
