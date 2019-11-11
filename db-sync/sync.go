@@ -117,20 +117,19 @@ func main() {
 		return
 	}
 
-	err := dumpDatabase(o)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	source, err := sql.Open("postgres", o.SourceURL)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	defer source.Close()
+
 	destiny, err := sql.Open("postgres", o.DestinationURL)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	defer destiny.Close()
 
 	tables := []string{"device_up", "device_ack", "device_join", "device_location", "device_status", "device_error"}
 
@@ -139,5 +138,10 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+	}
+
+	err = dumpDatabase(o)
+	if err != nil {
+		log.Fatal(err)
 	}
 }

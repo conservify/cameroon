@@ -44,6 +44,17 @@ docker: prepare-image
 docker-build: docker
 	docker run --rm --name camtest -v `pwd`/build:/home/worker/build/temp cameroon-build
 
-update-collector:
-	rsync -vua --progress collector pi@192.168.0.138:
-	rsync -vua --progress combined-db/schema pi@192.168.0.138:collector
+collector-build:
+	rsync -vua --progress collector $(BUILD)
+
+collector-arm-tools: $(BUILD)/collector/db-sync $(BUILD)/collector/db-read
+
+$(BUILD)/collector/db-sync: db-sync/*.go
+	env GOOS=linux GOARCH=arm go build -o $@ $^
+
+$(BUILD)/collector/db-read: db-read/*.go
+	env GOOS=linux GOARCH=arm go build -o $@ $^
+
+update-collector: collector-build collector-arm-tools
+	rsync -vua --progress combined-db/schema $(BUILD)/collector
+	rsync -vua --progress $(BUILD)/collector pi@192.168.0.138:
