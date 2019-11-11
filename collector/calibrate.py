@@ -63,7 +63,7 @@ def calibrate():
         else:
             break
 
-	calibration.save(calib)
+    calibration.save(calib)
     print('calibration saved to', calibration.config_path())
 
 
