@@ -46,3 +46,4 @@ docker-build: docker
 
 update-collector:
 	rsync -vua --progress collector pi@192.168.0.138:
+	rsync -vua --progress combined-db/schema pi@192.168.0.138:collector
