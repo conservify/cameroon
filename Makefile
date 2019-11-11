@@ -43,3 +43,6 @@ docker: prepare-image
 
 docker-build: docker
 	docker run --rm --name camtest -v `pwd`/build:/home/worker/build/temp cameroon-build
+
+update-collector:
+	rsync -vua --progress collector pi@192.168.0.138:

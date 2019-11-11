@@ -6,16 +6,17 @@ import sys
 import os
 import time
 import logging
+import calibrated_touch_events
 
 class WindowObject:
     def draw(self, display):
         pass
 
     def mouse_down(self, wm, p):
-        pass
+        return False
 
     def mouse_up(self, wm, p):
-        pass
+        return False
 
 class Button(WindowObject):
     def __init__(self, label, handler):
@@ -102,11 +103,15 @@ class MenuSystem(WindowObject):
         for button in self.children:
             if button.is_inside(p):
                 button.down(wm)
+                return True
+        return False
 
     def mouse_up(self, wm, p):
         for button in self.children:
             if button.pressed:
                 button.up(wm)
+                return True
+        return False
 
 class Messages(WindowObject):
     def __init__(self, bounds):
@@ -114,6 +119,16 @@ class Messages(WindowObject):
 
     def draw(self, display):
         pygame.draw.rect(display, (255, 255, 255), self.bounds, 2)
+
+class Cursor(WindowObject):
+    def __init__(self):
+        self.bounds = pygame.Rect((0, 0, 0, 0))
+
+    def mouse_down(self, wm, p):
+        self.bounds = pygame.Rect((p[0] - 5, p[1] - 5, 10, 10))
+
+    def draw(self, display):
+        pygame.draw.rect(display, (255, 0, 255), self.bounds, 2)
 
 class Window:
     def __init__(self):
@@ -126,12 +141,18 @@ class Window:
         self.children.append(child)
 
     def mouse_down(self, p):
+        redraw = False
         for c in self.children:
-            c.mouse_down(self, p)
+            if c.mouse_down(self, p):
+                redraw = True
+        return redraw
 
     def mouse_up(self, p):
+        redraw = False
         for c in self.children:
-            c.mouse_up(self, p)
+            if c.mouse_up(self, p):
+                redraw = True
+        return redraw
 
     def draw(self):
         self.display.fill((0, 0, 0))
@@ -154,33 +175,35 @@ class Window:
 
         self.draw()
 
+        pygame.event.set_blocked((pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION))
+
+        cme = calibrated_touch_events.CalibratedTouchEvents(self.xres, self.yres)
+
         while True:
-            for ev in pygame.event.get():
+            for ev in cme.read():
+                print(ev)
                 if ev.type == pygame.MOUSEBUTTONDOWN:
-                    original = pygame.mouse.get_pos()
-                    p = (
-                        int((      original[1]) / 320 * 480),
-                        int((480 - original[0]) / 480 * 320)
-                    )
-                    logging.info("MOUSEBUTTONDOWN:%s %s" % (original, p))
-                    self.mouse_down(p)
-                    self.draw()
+                    rel = pygame.mouse.get_rel()
+                    p = pygame.mouse.get_pos()
+                    if self.mouse_down(p):
+                        self.draw()
                     pygame.event.clear()
+
+                    b = pygame.Rect((p[0] - 5, p[1] - 5, 10, 10))
+                    pygame.draw.rect(self.display, (255, 255, 0), b, 2)
+                    pygame.display.update()
+
                 if ev.type == pygame.MOUSEBUTTONUP:
-                    original = pygame.mouse.get_pos()
-                    p = (
-                        int((      original[1]) / 320 * 480),
-                        int((480 - original[0]) / 480 * 320)
-                    )
-                    logging.info("MOUSEBUTTONUP:%s %s" % (original, p))
-                    self.mouse_up(p)
-                    self.draw()
+                    p = pygame.mouse.get_pos()
+                    if self.mouse_up(p):
+                        self.draw()
                     pygame.event.clear()
+
                 if ev.type == pygame.QUIT:
                     logging.info("QUIT")
                     pygame.event.clear()
 
-            time.sleep(0.1)
+            time.sleep(0.02)
 
 def main():
     logging.basicConfig(format='%(asctime)-15s %(message)s', level=logging.INFO)
@@ -194,11 +217,8 @@ def main():
 
     os.putenv('SDL_VIDEODRIVER', 'fbcon')
     os.putenv('SDL_FBDEV', '/dev/fb0')
-
-    # I get weird mouse locations back with this.
-    if False:
-        os.putenv('SDL_MOUSEDRV', 'TSLIB')
-        os.putenv('SDL_MOUSEDEV', '/dev/input/touchscreen')
+    os.putenv('SDL_MOUSEDRV', 'TSLIB')
+    os.putenv('SDL_MOUSEDEV', '/dev/input/event0')
 
     w = Window()
     bounds = w.bounds
@@ -212,6 +232,7 @@ def main():
 
     w.add(MenuSystem(menu_bounds))
     w.add(Messages(messages_bounds))
+    w.add(Cursor())
     w.run()
 
 if __name__== "__main__":
