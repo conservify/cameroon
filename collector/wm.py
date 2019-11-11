@@ -200,18 +200,19 @@ class Window:
         self.display = pygame.display.set_mode((self.xres, self.yres))
 
 class TextLine:
-    def __init__(self, line, rect, font, visible):
+    def __init__(self, line, rect, font):
         self.line = line
         self.rect = rect
         self.font = font
-        self.visible = visible
 
-    def draw(self, surface, color):
-        image = self.font.render(self.line, False, color)
-        surface.blit(image, (self.rect.left, self.rect.top))
+    def draw(self, surface, color, viewport, translate):
+        new_bounds = self.rect.move(translate)
+        if viewport.contains(new_bounds):
+            image = self.font.render(self.line, False, color)
+            surface.blit(image, (new_bounds.left, new_bounds.top))
 
     def __str__(self):
-        return "TextLine<%s, %s, %s>" % (self.visible, self.rect, self.line)
+        return "TextLine<%s, %s, %s>" % (self.rect, self.line)
 
 def break_wrapped(surface, all_text, rect, font):
     line_spacing = -2
@@ -230,13 +231,13 @@ def break_wrapped(surface, all_text, rect, font):
             if i < len(text):
                 i = text.rfind(" ", 0, i) + 1
 
-            size = font.size(text[:i])
+            line = text[:i].strip()
 
-            visible = y + size[1] <= rect.bottom
+            size = font.size(line)
 
             line_rect = pygame.Rect(rect.left, y, size[0], size[1] + line_spacing)
 
-            lines.append(TextLine(text[:i], line_rect, font, visible))
+            lines.append(TextLine(line, line_rect, font))
 
             y += size[1] + line_spacing
 
@@ -267,6 +268,10 @@ class TextWall(object):
     def draw(self, surface, color):
         bounds = self.bounds.copy()
         b, broken = break_wrapped(surface, self.text, bounds, self.font)
-        for tl in broken:
-            if tl.visible:
-                tl.draw(surface, color)
+        hidden = 0
+        ty = 0
+        for i, tl in enumerate(broken):
+            if i < self.offset:
+                ty += tl.rect.h
+                continue
+            tl.draw(surface, color, bounds, (0, -ty))

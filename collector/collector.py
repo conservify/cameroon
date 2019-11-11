@@ -55,17 +55,25 @@ class App:
         pass
 
     def data(self, w):
-        stop = time.time() + 10
-        w.display.fill((0, 0, 0))
-
         font = pygame.font.Font("determinationmonoweb-webfont.ttf", 14)
         text_wall = wm.TextWall(font, lorem, w.bounds)
+
+        w.display.fill((0, 0, 0))
         text_wall.draw(w.display, (255, 255, 255))
         pygame.display.update()
 
+        stop = time.time() + 10
         while time.time() < stop:
             for ev in w.read():
-                logging.info(str(ev))
+                if ev.type == pygame.MOUSEBUTTONUP:
+                    logging.info(str(ev))
+                    if ev.pos[1] > 320 / 2:
+                        text_wall.down()
+                    else:
+                        text_wall.up()
+                w.display.fill((0, 0, 0))
+                text_wall.draw(w.display, (255, 255, 255))
+                pygame.display.update()
             time.sleep(0.2)
 
 def main():
