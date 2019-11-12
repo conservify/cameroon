@@ -64,10 +64,14 @@ class Button(WindowObject):
             fg = black
 
         border = r.inflate(-5, -5)
+
+        if bg:
+            pygame.draw.rect(display, bg, border)
+
         pygame.draw.rect(display, fg, border, 2)
 
         f = pygame.font.Font('freesansbold.ttf', 32)
-        text = f.render(self.label, True, fg, bg)
+        text = f.render(self.label, True, fg, None)
         textRect = text.get_rect()
         textRect.center = (r.x + r.w / 2, r.y + r.h / 2)
         display.blit(text, textRect)
