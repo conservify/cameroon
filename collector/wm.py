@@ -18,6 +18,9 @@ class WindowObject:
     def mouse_up(self, wm, p):
         return False
 
+    def tick(self, wm):
+        return False
+
 class Button(WindowObject):
     def __init__(self, label, handler):
         self.label = label
@@ -101,11 +104,15 @@ class MenuSystem(WindowObject):
         return False
 
 class Messages(WindowObject):
-    def __init__(self, bounds):
+    def __init__(self, bounds, get_status):
         self.bounds = bounds
+        self.get_status = get_status
 
     def draw(self, display):
         pygame.draw.rect(display, (255, 255, 255), self.bounds, 2)
+
+    def tick(self, wm):
+        return False
 
 class Cursor(WindowObject):
     def __init__(self):
@@ -138,6 +145,13 @@ class Window:
         redraw = False
         for c in self.children:
             if c.mouse_up(self, p):
+                redraw = True
+        return redraw
+
+    def tick(self):
+        redraw = False
+        for c in self.children:
+            if c.tick(self):
                 redraw = True
         return redraw
 
@@ -183,11 +197,14 @@ class Window:
                     if self.mouse_up(ev.pos):
                         self.draw()
                     pygame.event.clear()
-                    print(down_for)
+                    logging.info("%s" % (down_for))
 
                 if ev.type == pygame.QUIT:
                     logging.info("QUIT")
                     pygame.event.clear()
+
+            if self.tick():
+                self.draw()
 
             time.sleep(0.02)
 

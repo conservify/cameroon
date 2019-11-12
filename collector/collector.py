@@ -42,9 +42,12 @@ class App:
         ]
 
         w.add(wm.MenuSystem(menu_bounds, buttons, 2, 2))
-        w.add(wm.Messages(messages_bounds))
+        w.add(wm.Messages(messages_bounds, self.status))
         w.add(wm.Cursor())
         w.run()
+
+    def status(self, w):
+        return "status information"
 
     def restart(self, w):
         sys.exit(0)
