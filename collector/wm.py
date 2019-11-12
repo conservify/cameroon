@@ -28,6 +28,20 @@ class Button(WindowObject):
         self.border = None
         self.pressed = False
 
+    def is_inside(self, test):
+        if not self.border: return False
+        return self.border.collidepoint(test)
+
+    def down(self, wm):
+        if self.enabled():
+            self.pressed = True
+
+    def up(self, wm):
+        if self.pressed:
+            logging.info(self.label)
+            self.handler(wm)
+            self.pressed = False
+
     def draw(self, display, r):
         black = (0, 0, 0)
         white = (255, 255, 255)
@@ -49,18 +63,8 @@ class Button(WindowObject):
 
         self.border = r
 
-    def is_inside(self, test):
-        if not self.border: return False
-        return self.border.collidepoint(test)
-
-    def down(self, wm):
-        self.pressed = True
-
-    def up(self, wm):
-        if self.pressed:
-            logging.info(self.label)
-            self.handler(wm)
-            self.pressed = False
+    def enabled(self):
+        return True
 
 class MenuSystem(WindowObject):
     def __init__(self, bounds, buttons, ncolumns, nrows):

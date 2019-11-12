@@ -3,26 +3,71 @@
 import signal
 import sys
 import os
+import argparse
 import logging
 import wm
 import time
 import pygame
 import subprocess
+import threading
+import psycopg2
+import psycopg2.extras
 
-lorem = """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed aliquet
-tellus eros, eu faucibus dui. Phasellus eleifend, massa id ornare sodales, est urna
-congue tellus, vitae varius metus nunc non enim. Mauris elementum, arcu vitae tempor euismod, justo turpis malesuada est, sed dictum nunc nulla nec mauris. Cras felis eros, elementum vitae sollicitudin in, elementum et augue. Proin eget nunc at dui congue pretium. Donec ut ipsum ut lacus mollis tristique. In pretium varius dui eu dictum.
+class Synchronizer:
+    def __init__(self, options):
+        self.options = options
+        psycopg2.extras.register_default_json(loads=lambda x: x)
+        psycopg2.extras.register_default_jsonb(loads=lambda x: x)
 
-Proin pulvinar metus nec mi semper semper. Pellentesque habitant morbi tristique
-senectus et netus et malesuada fames ac turpis egestas. Proin in diam odio. Vestibulum
-at neque sed ante sodales eleifend quis id dui. Mauris sollicitudin, metus a semper consectetur,
-est lectus varius erat, sit amet ultrices tortor nisi id justo. Aliquam elementum vestibulum dui ut auctor. Mauris commodo sapien vitae augue tempus sagittis. Morbi a nibh lectus, sed porta nibh. Donec et est ac dui sodales aliquet tristique et arcu. Nullam enim felis, posuere vel rutrum eu, euismod a purus. Morbi porta cursus libero, id rutrum elit lacinia vitae.
+    def start(self):
+        thread = threading.Thread(target=self.run, args=())
+        thread.daemon = True
+        thread.start()
 
-In condimentum ultrices ipsum, ut convallis odio egestas et. Cras at egestas elit. Morbi
-quis neque ligula. Sed tempor, sem at fringilla rhoncus, diam quam mollis nisi, vitae semper
-mi massa sit amet tellus. Vivamus congue commodo ornare. Morbi et mi non sem malesuada rutrum. Etiam est purus, interdum ut placerat sit amet, tempus eget eros. Duis eget augue quis diam facilisis blandit. Ut vulputate adipiscing eleifend. """
+    def run(self):
+        logging.info('started synchronizer')
+
+        while True:
+            if self.check_for_gateway():
+                logging.info("found gateway")
+            time.sleep(1.0)
+
+    def sync(self):
+        source = psycopg2.connect("postgres://loraserver_as_data:asdfasdf@192.168.0.30/loraserver_as_data")
+
+        destiny = psycopg2.connect("postgres://lora-combined:asdfasdf@192.168.0.100/lora-combined?sslmode=disable")
+
+        try:
+            for table in ["device_up", "device_ack", "device_join", "device_location", "device_status", "device_error"]:
+                query = source.cursor()
+                try:
+                    logging.info("querying %s" % (table))
+                    query.execute("SELECT * FROM %s" % (table))
+
+                    num_fields = len(query.description)
+                    names = [c.name for c in query.description]
+                    values = ["%s"] * num_fields
+                    insertionQuery = "INSERT INTO %s (%s) VALUES (%s) ON CONFLICT DO NOTHING" % (table, ", ".join(names), ", ".join(values))
+
+                    for row in query.fetchall():
+                        insertion = destiny.cursor()
+                        insertion.execute(insertionQuery, row)
+                        insertion.close()
+                finally:
+                    query.close()
+
+            logging.info("done")
+        finally:
+            if source: source.close()
+            if destiny: destiny.close()
+
+    def check_for_gateway(self):
+        return subprocess.call(["ping", '-c', '1', "192.168.1.30"]) == 0
 
 class App:
+    def __init__(self, options):
+        self.options = options
+
     def run(self):
         w = wm.Window()
         bounds = w.bounds
@@ -38,13 +83,22 @@ class App:
             wm.Button("Restart", self.restart),
             wm.Button("Reboot", self.reboot),
             wm.Button("Logs", self.logs),
-            wm.Button("Data", self.data),
+            wm.Button("Sync", self.sync),
         ]
+
+        self.s = Synchronizer(self.options)
 
         w.add(wm.MenuSystem(menu_bounds, buttons, 2, 2))
         w.add(wm.Messages(messages_bounds, self.status))
         w.add(wm.Cursor())
         w.run()
+
+    def stop(self):
+        self.s.stop()
+
+    def sync(self, w):
+        s = Synchronizer(self.options)
+        s.sync()
 
     def status(self, w):
         return "status information"
@@ -76,7 +130,7 @@ class App:
 
     def data(self, w):
         font = pygame.font.Font("determinationmonoweb-webfont.ttf", 14)
-        text_wall = wm.TextWall(font, lorem, w.bounds)
+        text_wall = wm.TextWall(font, "", w.bounds)
 
         w.display.fill((0, 0, 0))
         text_wall.draw(w.display, (255, 255, 255))
@@ -99,8 +153,16 @@ class App:
 def main():
     logging.basicConfig(format='%(asctime)-15s %(message)s', level=logging.INFO)
 
+    parser = argparse.ArgumentParser(description='Firmware Preparation Tool')
+    parser.add_argument('--source', dest="source", default=None, help="")
+    parser.add_argument('--destiny', dest="destiny", default=None, help="")
+    args, nargs = parser.parse_known_args()
+
+    app = App(args)
+
     def signal_handler(sig, frame):
-        logging.info('Terminating')
+        logging.info('terminating')
+        app.stop()
         sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
@@ -108,7 +170,6 @@ def main():
     os.putenv('SDL_VIDEODRIVER', 'fbcon')
     os.putenv('SDL_FBDEV', '/dev/fb0')
 
-    app = App()
     app.run()
 
 if __name__== "__main__":
