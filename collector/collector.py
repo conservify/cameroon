@@ -11,6 +11,18 @@ import pygame
 import subprocess
 import queue
 import sync
+import collections
+
+class Layout:
+    def __init__(self, window):
+        bounds = window.bounds
+
+        self.menu = bounds.copy()
+        self.menu.h -= 80
+
+        self.messages = bounds.copy()
+        self.messages.y = self.menu.h
+        self.messages.h = 80
 
 class App:
     def __init__(self, options):
@@ -18,30 +30,48 @@ class App:
         self.task = None
 
     def run(self):
-        w = wm.Window()
-        bounds = w.bounds
+        window = wm.Window()
+        layout = Layout(window)
 
-        menu_bounds = bounds.copy()
-        menu_bounds.h -= 80
-
-        messages_bounds = bounds.copy()
-        messages_bounds.y = menu_bounds.h
-        messages_bounds.h = 80
-
-        buttons = [
+        main_buttons = [
             wm.Button("Restart", self.restart),
-            wm.Button("Reboot", self.reboot),
             wm.Button("Logs", self.logs),
             wm.Button("Sync", self.sync),
+            wm.Button("Tools", self.tools),
         ]
 
-        w.add(wm.MenuSystem(menu_bounds, buttons, 2, 2))
-        w.add(wm.Messages(messages_bounds, self.status))
-        w.add(wm.Cursor())
-        w.run()
+        tools_buttons = [
+            wm.Button("Back/Home", self.home),
+            wm.Button("Restart", self.restart),
+            wm.Button("Reboot", self.reboot),
+        ]
+
+        self.main_menu = wm.MenuSystem(layout.menu, main_buttons, 2, 2)
+        self.main_menu.show()
+
+        self.tools_menu = wm.MenuSystem(layout.menu, tools_buttons, 2, 2)
+        self.tools_menu.hide()
+
+        self.messages = wm.Messages(layout.messages, self.status)
+
+        window.add(self.main_menu)
+        window.add(self.tools_menu)
+        window.add(self.messages)
+        window.add(wm.Cursor())
+        window.run()
 
     def stop(self):
         self.s.stop()
+
+    def home(self, w):
+        self.tools_menu.hide()
+        self.main_menu.show()
+        return True
+
+    def tools(self, w):
+        self.tools_menu.show()
+        self.main_menu.hide()
+        return True
 
     def sync(self, w):
         if self.task:

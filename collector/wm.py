@@ -8,9 +8,10 @@ import calibrated_touch_events
 class WindowObject:
     def __init__(self):
         self.visible = True
+        self.dirty = False
 
     def draw(self, display):
-        pass
+        self.dirty = True
 
     def mouse_down(self, wm, p):
         return False
@@ -21,16 +22,21 @@ class WindowObject:
     def tick(self, wm):
         return False
 
+    def show(self):
+        self.visible = True
+        self.dirty = True
+
+    def hide(self):
+        self.visible = False
+        self.dirty = True
+
 class Button(WindowObject):
     def __init__(self, label, handler):
+        super(Button, self).__init__()
         self.label = label
         self.handler = handler
         self.border = None
         self.pressed = False
-
-    def is_inside(self, test):
-        if not self.border: return False
-        return self.border.collidepoint(test)
 
     def down(self, wm):
         if self.enabled():
@@ -41,6 +47,11 @@ class Button(WindowObject):
             logging.info(self.label)
             self.handler(wm)
             self.pressed = False
+
+    def is_inside(self, test):
+        if not self.border:
+            return False
+        return self.border.collidepoint(test)
 
     def draw(self, display, r):
         black = (0, 0, 0)
@@ -68,6 +79,7 @@ class Button(WindowObject):
 
 class MenuSystem(WindowObject):
     def __init__(self, bounds, buttons, ncolumns, nrows):
+        super(MenuSystem, self).__init__()
         self.bounds = bounds
         self.ncolumns = ncolumns
         self.nrows = nrows
@@ -77,7 +89,7 @@ class MenuSystem(WindowObject):
         black = (0, 0, 0)
         white = (255, 255, 255)
 
-        pygame.draw.rect(display, white, self.bounds, 2)
+        if False: pygame.draw.rect(display, white, self.bounds, 2)
 
         dw = self.bounds.w / self.ncolumns
         dh = self.bounds.h / self.nrows
@@ -109,12 +121,13 @@ class MenuSystem(WindowObject):
 
 class Messages(WindowObject):
     def __init__(self, bounds, get_status):
+        super(Messages, self).__init__()
         self.bounds = bounds
         self.get_status = get_status
         self.status = None
 
     def draw(self, display):
-        pygame.draw.rect(display, (255, 255, 255), self.bounds, 2)
+        if False: pygame.draw.rect(display, (255, 255, 255), self.bounds, 2)
 
     def tick(self, wm):
         new_status = self.get_status()
@@ -125,6 +138,7 @@ class Messages(WindowObject):
 
 class Cursor(WindowObject):
     def __init__(self):
+        super(Cursor, self).__init__()
         self.bounds = pygame.Rect((0, 0, 0, 0))
 
     def mouse_down(self, wm, p):
@@ -146,15 +160,17 @@ class Window:
     def mouse_down(self, p):
         redraw = False
         for c in self.children:
-            if c.mouse_down(self, p):
-                redraw = True
+            if c.visible:
+                if c.mouse_down(self, p):
+                    redraw = True
         return redraw
 
     def mouse_up(self, p):
         redraw = False
         for c in self.children:
-            if c.mouse_up(self, p):
-                redraw = True
+            if c.visible:
+                if c.mouse_up(self, p):
+                    redraw = True
         return redraw
 
     def tick(self):
@@ -168,7 +184,8 @@ class Window:
         self.display.fill((0, 0, 0))
 
         for c in self.children:
-            c.draw(self.display)
+            if c.visible:
+                c.draw(self.display)
 
         pygame.display.update()
 
