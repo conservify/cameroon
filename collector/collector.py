@@ -57,7 +57,7 @@ class App:
     def logs(self, w):
         w.stop()
 
-        p = subprocess.Popen("tail -f /var/log/messages > /dev/tty0", shell=True)
+        p = subprocess.Popen("tail -f /var/log/messages > /dev/tty0", shell=True, preexec_fn=os.setsid)
         try:
             looping = True
             while looping:
@@ -67,7 +67,8 @@ class App:
                         looping = False
                         break
         finally:
-            p.terminate()
+            logging.info("killing tail %s" % (p.pid))
+            os.killpg(os.getpgid(p.pid), signal.SIGTERM)
         w.show()
 
     def data(self, w):
