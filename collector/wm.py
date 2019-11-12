@@ -5,6 +5,8 @@ import logging
 
 import calibrated_touch_events
 
+Padding = 5
+
 class WindowObject:
     def __init__(self):
         self.visible = True
@@ -56,14 +58,14 @@ class Button(WindowObject):
     def draw(self, display, r):
         black = (0, 0, 0)
         white = (255, 255, 255)
-        bg = None
+        bg = (50, 177, 255)
         fg = white
 
         if self.pressed:
             bg = white
             fg = black
 
-        border = r.inflate(-5, -5)
+        border = r.inflate(-Padding, -Padding)
 
         if bg:
             pygame.draw.rect(display, bg, border)
@@ -126,12 +128,19 @@ class MenuSystem(WindowObject):
 class Messages(WindowObject):
     def __init__(self, bounds, get_status):
         super(Messages, self).__init__()
-        self.bounds = bounds
+        self.bounds = bounds.inflate(-Padding, -Padding)
         self.get_status = get_status
-        self.status = None
+        self.status = "Hello, world how are you."
+        self.font = None
 
     def draw(self, display):
         if False: pygame.draw.rect(display, (255, 255, 255), self.bounds, 2)
+
+        if not self.font:
+            self.font = pygame.font.Font("determinationmonoweb-webfont.ttf", 14)
+
+        text_wall = TextWall(self.font, self.status, self.bounds)
+        text_wall.draw(display, (255, 255, 255))
 
     def tick(self, wm):
         new_status = self.get_status()
