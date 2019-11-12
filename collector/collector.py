@@ -35,7 +35,7 @@ class App:
 
         buttons = [
             wm.Button("Restart", self.restart),
-            wm.Button("Logs", self.logs),
+            wm.Button("Reboot", self.reboot),
             wm.Button("Retry", self.retry),
             wm.Button("Data", self.data),
         ]
@@ -46,7 +46,12 @@ class App:
         w.run()
 
     def restart(self, w):
-        pass
+        sys.exit(0)
+
+    def reboot(self, w):
+        w.stop()
+        time.sleep(1.0)
+        os.system("reboot")
 
     def logs(self, w):
         pass
