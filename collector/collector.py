@@ -7,6 +7,7 @@ import logging
 import wm
 import time
 import pygame
+import subprocess
 
 lorem = """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed aliquet
 tellus eros, eu faucibus dui. Phasellus eleifend, massa id ornare sodales, est urna
@@ -36,7 +37,7 @@ class App:
         buttons = [
             wm.Button("Restart", self.restart),
             wm.Button("Reboot", self.reboot),
-            wm.Button("Retry", self.retry),
+            wm.Button("Logs", self.logs),
             wm.Button("Data", self.data),
         ]
 
@@ -54,10 +55,20 @@ class App:
         os.system("reboot")
 
     def logs(self, w):
-        pass
+        w.stop()
 
-    def retry(self, w):
-        pass
+        p = subprocess.Popen("tail -f /var/log/messages > /dev/tty0", shell=True)
+        try:
+            looping = True
+            while looping:
+                for ev in w.read():
+                    if ev.type == pygame.MOUSEBUTTONUP:
+                        logging.info("stopping")
+                        looping = False
+                        break
+        finally:
+            p.terminate()
+        w.show()
 
     def data(self, w):
         font = pygame.font.Font("determinationmonoweb-webfont.ttf", 14)
