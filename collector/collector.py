@@ -9,64 +9,13 @@ import wm
 import time
 import pygame
 import subprocess
-import threading
-import psycopg2
-import psycopg2.extras
-
-class Synchronizer:
-    def __init__(self, options):
-        self.options = options
-        psycopg2.extras.register_default_json(loads=lambda x: x)
-        psycopg2.extras.register_default_jsonb(loads=lambda x: x)
-
-    def start(self):
-        thread = threading.Thread(target=self.run, args=())
-        thread.daemon = True
-        thread.start()
-
-    def run(self):
-        logging.info('started synchronizer')
-
-        while True:
-            if self.check_for_gateway():
-                logging.info("found gateway")
-            time.sleep(1.0)
-
-    def sync(self):
-        source = psycopg2.connect("postgres://loraserver_as_data:asdfasdf@192.168.0.30/loraserver_as_data")
-
-        destiny = psycopg2.connect("postgres://lora-combined:asdfasdf@192.168.0.100/lora-combined?sslmode=disable")
-
-        try:
-            for table in ["device_up", "device_ack", "device_join", "device_location", "device_status", "device_error"]:
-                query = source.cursor()
-                try:
-                    logging.info("querying %s" % (table))
-                    query.execute("SELECT * FROM %s" % (table))
-
-                    num_fields = len(query.description)
-                    names = [c.name for c in query.description]
-                    values = ["%s"] * num_fields
-                    insertionQuery = "INSERT INTO %s (%s) VALUES (%s) ON CONFLICT DO NOTHING" % (table, ", ".join(names), ", ".join(values))
-
-                    for row in query.fetchall():
-                        insertion = destiny.cursor()
-                        insertion.execute(insertionQuery, row)
-                        insertion.close()
-                finally:
-                    query.close()
-
-            logging.info("done")
-        finally:
-            if source: source.close()
-            if destiny: destiny.close()
-
-    def check_for_gateway(self):
-        return subprocess.call(["ping", '-c', '1', "192.168.1.30"]) == 0
+import queue
+import sync
 
 class App:
     def __init__(self, options):
         self.options = options
+        self.task = None
 
     def run(self):
         w = wm.Window()
@@ -86,8 +35,6 @@ class App:
             wm.Button("Sync", self.sync),
         ]
 
-        self.s = Synchronizer(self.options)
-
         w.add(wm.MenuSystem(menu_bounds, buttons, 2, 2))
         w.add(wm.Messages(messages_bounds, self.status))
         w.add(wm.Cursor())
@@ -97,10 +44,15 @@ class App:
         self.s.stop()
 
     def sync(self, w):
-        s = Synchronizer(self.options)
-        s.sync()
+        if self.task:
+            if self.task.is_alive():
+                logging.info("busy")
+                return
 
-    def status(self, w):
+        self.task = sync.Synchronizer(self.options)
+        self.task.start()
+
+    def status(self):
         return "status information"
 
     def restart(self, w):
@@ -154,6 +106,7 @@ def main():
     logging.basicConfig(format='%(asctime)-15s %(message)s', level=logging.INFO)
 
     parser = argparse.ArgumentParser(description='Firmware Preparation Tool')
+    parser.add_argument('--watch', dest="watch", default=None, help="")
     parser.add_argument('--source', dest="source", default=None, help="")
     parser.add_argument('--destiny', dest="destiny", default=None, help="")
     args, nargs = parser.parse_known_args()

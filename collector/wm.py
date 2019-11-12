@@ -111,12 +111,17 @@ class Messages(WindowObject):
     def __init__(self, bounds, get_status):
         self.bounds = bounds
         self.get_status = get_status
+        self.status = None
 
     def draw(self, display):
         pygame.draw.rect(display, (255, 255, 255), self.bounds, 2)
 
     def tick(self, wm):
-        return False
+        new_status = self.get_status()
+        if self.status == new_status:
+            return False
+        self.status = new_status
+        return True
 
 class Cursor(WindowObject):
     def __init__(self):
