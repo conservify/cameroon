@@ -20,29 +20,35 @@ class Worker:
         self.work()
         logging.info("done")
 
-class Summary(collections.namedtuple("Summary", "uplinks downlinks joins")):
+class Summary(collections.namedtuple("Summary", "uplinks joins uplinks_size joins_size")):
         __slots__ = ()
         def __str__(self):
-            return "(uplinks=%d, downlinks=%d)" % (self.uplinks, self.downlinks)
+            return "(uplinks=%d, size=%d)" % (self.uplinks, self.uplinks_size)
 
 class Synchronizer(Worker):
     def __init__(self, options, status):
         self.options = options
         self.status = status
-        self.tables = ["device_up", "device_ack", "device_join", "device_location", "device_status", "device_error"]
         self.thread = None
+        self.tables = ["device_up", "device_ack", "device_join", "device_location", "device_status", "device_error"]
 
         psycopg2.extras.register_default_json(loads=lambda x: x)
         psycopg2.extras.register_default_jsonb(loads=lambda x: x)
 
-    def get_summary(self, source):
-        c = source.cursor()
+    def query(self, source, sql):
+        c = None
         try:
-            c.execute("SELECT COUNT(*) FROM device_up")
-            uplinks = c.fetchone()[0]
-            return Summary(uplinks=uplinks, downlinks=0, joins=0)
+            c = source.cursor()
+            c.execute(sql)
+            return c.fetchone()
         finally:
-            c.close()
+            if c: c.close()
+
+    def get_summary(self, source):
+        uplinks = self.query(source, "SELECT COUNT(*) AS uplinks FROM device_up")[0]
+        uplinks_size, joins_size = self.query(source, "SELECT pg_total_relation_size('device_up') AS uplinks_size, pg_total_relation_size('device_join') AS joins_size")
+
+        return Summary(uplinks=uplinks, joins=0, uplinks_size=uplinks_size, joins_size=joins_size)
 
     def check_for_gateway(self):
         return subprocess.call(["ping", '-c', '1', "192.168.1.30"]) == 0
