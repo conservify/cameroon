@@ -1,3 +1,4 @@
+import sys
 import logging
 import threading
 import collections
@@ -49,10 +50,16 @@ class Synchronizer(Worker):
     def work(self):
         self.status("trying")
 
-        source = psycopg2.connect(self.options.source)
-        destiny = psycopg2.connect(self.options.destiny)
+        source = None
+        destiny = None
 
         try:
+            logging.info("source %s" % (self.options.source,))
+            logging.info("destiny %s" % (self.options.destiny,))
+
+            source = psycopg2.connect(self.options.source)
+            destiny = psycopg2.connect(self.options.destiny)
+
             self.status("querying summary...")
 
             summary = self.get_summary(source)
@@ -80,8 +87,13 @@ class Synchronizer(Worker):
                 finally:
                     query.close()
             self.status("%s sync completed" % (summary,))
+        except psycopg2.OperationalError as e:
+            logging.info("error: %s" % (e,))
+            self.status("error syncing: %s" % (e,))
         except:
-            self.status("error syncing")
+            e = sys.exc_info()[0]
+            logging.info("error: %s" % (e,))
+            self.status("error syncing: %s" % (e,))
         finally:
             if source: source.close()
             if destiny: destiny.close()
