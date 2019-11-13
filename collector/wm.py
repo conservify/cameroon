@@ -2,6 +2,7 @@ import pygame
 import time
 import datetime
 import logging
+import queue
 
 import calibrated_touch_events
 
@@ -126,12 +127,16 @@ class MenuSystem(WindowObject):
         return False
 
 class Messages(WindowObject):
-    def __init__(self, bounds, get_status):
+    def __init__(self, bounds):
         super(Messages, self).__init__()
         self.bounds = bounds.inflate(-Padding, -Padding)
-        self.get_status = get_status
-        self.status = "Hello, world how are you."
         self.font = None
+        self.status = None
+        self.queue = queue.Queue()
+        self.queue.put("Hello, there! I'm ready for data, have a good and safe hike!")
+
+    def inbox(self):
+        return self.queue
 
     def draw(self, display):
         if False: pygame.draw.rect(display, (255, 255, 255), self.bounds, 2)
@@ -144,11 +149,13 @@ class Messages(WindowObject):
             text_wall.draw(display, (255, 255, 255))
 
     def tick(self, wm):
-        new_status = self.get_status()
-        if self.status == new_status:
-            return False
-        self.status = new_status
-        return True
+        dirty = False
+        while not self.queue.empty():
+            new_status = self.queue.get()
+            if self.status != new_status:
+                self.status = new_status
+                dirty = True
+        return dirty
 
 class Cursor(WindowObject):
     def __init__(self):

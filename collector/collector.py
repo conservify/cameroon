@@ -52,7 +52,7 @@ class App:
         self.tools_menu = wm.MenuSystem(layout.menu, tools_buttons, 2, 2)
         self.tools_menu.hide()
 
-        self.messages = wm.Messages(layout.messages, self.status)
+        self.messages = wm.Messages(layout.messages)
 
         window.add(self.main_menu)
         window.add(self.tools_menu)
@@ -81,9 +81,6 @@ class App:
 
         self.task = sync.Synchronizer(self.options)
         self.task.start()
-
-    def status(self):
-        return "status information"
 
     def restart(self, w):
         sys.exit(0)
