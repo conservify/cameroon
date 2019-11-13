@@ -43,7 +43,7 @@ class App:
         tools_buttons = [
             wm.Button("Back/Home", self.home),
             wm.Button("Restart", self.restart),
-            wm.Button("Reboot", self.reboot),
+            wm.Button("Reboot", self.reboot, (255, 0, 0)),
         ]
 
         self.main_menu = wm.MenuSystem(layout.menu, main_buttons, 2, 2)

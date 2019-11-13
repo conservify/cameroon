@@ -34,10 +34,11 @@ class WindowObject:
         self.dirty = True
 
 class Button(WindowObject):
-    def __init__(self, label, handler):
+    def __init__(self, label, handler, bg=(50, 177, 255)):
         super(Button, self).__init__()
         self.label = label
         self.handler = handler
+        self.bg = bg
         self.border = None
         self.pressed = False
 
@@ -59,7 +60,7 @@ class Button(WindowObject):
     def draw(self, display, r):
         black = (0, 0, 0)
         white = (255, 255, 255)
-        bg = (50, 177, 255)
+        bg = self.bg
         fg = white
 
         if self.pressed:
