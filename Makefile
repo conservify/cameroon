@@ -29,6 +29,7 @@ $(BUILD)/yocto:
 	cd $(BUILD)/yocto && git clone git://github.com/Wifx/meta-golang.git golang/meta-golang -b master
 	cd $(BUILD)/yocto && git clone git://git.yoctoproject.org/meta-maker -b master
 	cd $(BUILD)/yocto/meta-maker && git checkout -b working c039fafa7a0276769d0928d16bdacd2012f2aff6
+	cd $(BUILD)/yocto && git clone git://github.com/brocaar/chirpstack-gateway-os.git
 
 prepare-image: $(BUILD)/yocto
 	cp wifx-base.inc $(BUILD)/yocto/meta-wifx/recipes-wifx/images/wifx-base.inc

@@ -1,12 +1,8 @@
 #!/bin/bash
 
-set -e
-
-echo BUILDING
+set -xe
 
 whoami
-
-pwd
 
 ls -alh
 
@@ -14,10 +10,24 @@ pushd yocto/poky
 
 source oe-init-build-env build-wifx
 
-pwd
-
 ls -alh
 
-nice -n19 bitbake wifx-base
+time nice -n19 bitbake wifx-base
+
+find . -type d
+
+IMAGES=`pwd`/tmp/deploy/images
+
+ROOTFS=`find . -name rootfs`
+
+pushd $ROOTFS
+
+rm -f ${IMAGES}/rootfs.tar.bz2
+
+tar cpjf ${IMAGES}/rootfs.tar.bz2 .
 
 popd
+
+popd
+
+echo Done!

@@ -12,7 +12,6 @@ IMAGE_INSTALL = "\
     setserial \
     opkg \
     iperf \
-    nano \
     start-stop-daemon-ext \
     \
     nbench-byte \
@@ -50,6 +49,16 @@ IMAGE_INSTALL = "\
     ttn-packet-forwarder \
     kersing-packet-forwarder \
     clouds-manager \
+	\
+	vim \
+	tmux \
+	\
+	postgresql \
+	\
+	chirpstack-gateway-bridge \
+	chirpstack-application-server \
+	chirpstack-network-server \
+	\
     ${CORE_IMAGE_EXTRA_INSTALL} \
     "
 
