@@ -48,5 +48,17 @@ docker-build: docker
 		--mount source=yocto-sstate-cache-camtset,target=/home/worker/yocto/poky/build-wifx/sstate-cache \
 		cameroon-build
 
-update-collector:
-	rsync -vua --progress collector pi@192.168.0.138:
+collector-build:
+	rsync -vua --progress collector $(BUILD)
+
+collector-arm-tools: $(BUILD)/collector/db-sync $(BUILD)/collector/db-read
+
+$(BUILD)/collector/db-sync: db-sync/*.go
+	env GOOS=linux GOARCH=arm go build -o $@ $^
+
+$(BUILD)/collector/db-read: db-read/*.go
+	env GOOS=linux GOARCH=arm go build -o $@ $^
+
+update-collector: collector-build collector-arm-tools
+	rsync -vua --progress combined-db/schema $(BUILD)/collector
+	rsync -vua --progress $(BUILD)/collector pi@192.168.0.138:

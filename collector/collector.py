@@ -3,60 +3,116 @@
 import signal
 import sys
 import os
+import argparse
 import logging
 import wm
 import time
 import pygame
+import subprocess
+import queue
+import sync
+import collections
 
-lorem = """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed aliquet
-tellus eros, eu faucibus dui. Phasellus eleifend, massa id ornare sodales, est urna
-congue tellus, vitae varius metus nunc non enim. Mauris elementum, arcu vitae tempor euismod, justo turpis malesuada est, sed dictum nunc nulla nec mauris. Cras felis eros, elementum vitae sollicitudin in, elementum et augue. Proin eget nunc at dui congue pretium. Donec ut ipsum ut lacus mollis tristique. In pretium varius dui eu dictum.
+class Layout:
+    def __init__(self, window):
+        bounds = window.bounds
 
-Proin pulvinar metus nec mi semper semper. Pellentesque habitant morbi tristique
-senectus et netus et malesuada fames ac turpis egestas. Proin in diam odio. Vestibulum
-at neque sed ante sodales eleifend quis id dui. Mauris sollicitudin, metus a semper consectetur,
-est lectus varius erat, sit amet ultrices tortor nisi id justo. Aliquam elementum vestibulum dui ut auctor. Mauris commodo sapien vitae augue tempus sagittis. Morbi a nibh lectus, sed porta nibh. Donec et est ac dui sodales aliquet tristique et arcu. Nullam enim felis, posuere vel rutrum eu, euismod a purus. Morbi porta cursus libero, id rutrum elit lacinia vitae.
+        self.menu = bounds.copy()
+        self.menu.h -= 80
 
-In condimentum ultrices ipsum, ut convallis odio egestas et. Cras at egestas elit. Morbi
-quis neque ligula. Sed tempor, sem at fringilla rhoncus, diam quam mollis nisi, vitae semper
-mi massa sit amet tellus. Vivamus congue commodo ornare. Morbi et mi non sem malesuada rutrum. Etiam est purus, interdum ut placerat sit amet, tempus eget eros. Duis eget augue quis diam facilisis blandit. Ut vulputate adipiscing eleifend. """
+        self.messages = bounds.copy()
+        self.messages.y = self.menu.h
+        self.messages.h = 80
 
 class App:
+    def __init__(self, options):
+        self.options = options
+        self.task = None
+
     def run(self):
-        w = wm.Window()
-        bounds = w.bounds
+        window = wm.Window()
+        layout = Layout(window)
 
-        menu_bounds = bounds.copy()
-        menu_bounds.h -= 80
-
-        messages_bounds = bounds.copy()
-        messages_bounds.y = menu_bounds.h
-        messages_bounds.h = 80
-
-        buttons = [
+        main_buttons = [
             wm.Button("Restart", self.restart),
             wm.Button("Logs", self.logs),
-            wm.Button("Retry", self.retry),
-            wm.Button("Data", self.data),
+            wm.Button("Sync", self.sync),
+            wm.Button("Tools", self.tools),
         ]
 
-        w.add(wm.MenuSystem(menu_bounds, buttons, 2, 2))
-        w.add(wm.Messages(messages_bounds))
-        w.add(wm.Cursor())
-        w.run()
+        tools_buttons = [
+            wm.Button("Back/Home", self.home),
+            wm.Button("Restart", self.restart),
+            wm.Button("Reboot", self.reboot),
+        ]
+
+        self.main_menu = wm.MenuSystem(layout.menu, main_buttons, 2, 2)
+        self.main_menu.show()
+
+        self.tools_menu = wm.MenuSystem(layout.menu, tools_buttons, 2, 2)
+        self.tools_menu.hide()
+
+        self.messages = wm.Messages(layout.messages, self.status)
+
+        window.add(self.main_menu)
+        window.add(self.tools_menu)
+        window.add(self.messages)
+        window.add(wm.Cursor())
+        window.run()
+
+    def stop(self):
+        self.s.stop()
+
+    def home(self, w):
+        self.tools_menu.hide()
+        self.main_menu.show()
+        return True
+
+    def tools(self, w):
+        self.tools_menu.show()
+        self.main_menu.hide()
+        return True
+
+    def sync(self, w):
+        if self.task:
+            if self.task.is_alive():
+                logging.info("busy")
+                return
+
+        self.task = sync.Synchronizer(self.options)
+        self.task.start()
+
+    def status(self):
+        return "status information"
 
     def restart(self, w):
-        pass
+        sys.exit(0)
+
+    def reboot(self, w):
+        w.stop()
+        time.sleep(1.0)
+        os.system("reboot")
 
     def logs(self, w):
-        pass
+        w.stop()
 
-    def retry(self, w):
-        pass
+        p = subprocess.Popen("tail -f /var/log/messages > /dev/tty0", shell=True, preexec_fn=os.setsid)
+        try:
+            looping = True
+            while looping:
+                for ev in w.read():
+                    if ev.type == pygame.MOUSEBUTTONUP:
+                        logging.info("stopping")
+                        looping = False
+                        break
+        finally:
+            logging.info("killing tail %s" % (p.pid))
+            os.killpg(os.getpgid(p.pid), signal.SIGTERM)
+        w.show()
 
     def data(self, w):
         font = pygame.font.Font("determinationmonoweb-webfont.ttf", 14)
-        text_wall = wm.TextWall(font, lorem, w.bounds)
+        text_wall = wm.TextWall(font, "", w.bounds)
 
         w.display.fill((0, 0, 0))
         text_wall.draw(w.display, (255, 255, 255))
@@ -79,8 +135,17 @@ class App:
 def main():
     logging.basicConfig(format='%(asctime)-15s %(message)s', level=logging.INFO)
 
+    parser = argparse.ArgumentParser(description='Firmware Preparation Tool')
+    parser.add_argument('--watch', dest="watch", default=None, help="")
+    parser.add_argument('--source', dest="source", default=None, help="")
+    parser.add_argument('--destiny', dest="destiny", default=None, help="")
+    args, nargs = parser.parse_known_args()
+
+    app = App(args)
+
     def signal_handler(sig, frame):
-        logging.info('Terminating')
+        logging.info('terminating')
+        app.stop()
         sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
@@ -88,7 +153,6 @@ def main():
     os.putenv('SDL_VIDEODRIVER', 'fbcon')
     os.putenv('SDL_FBDEV', '/dev/fb0')
 
-    app = App()
     app.run()
 
 if __name__== "__main__":
