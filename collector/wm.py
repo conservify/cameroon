@@ -137,10 +137,11 @@ class Messages(WindowObject):
         if False: pygame.draw.rect(display, (255, 255, 255), self.bounds, 2)
 
         if not self.font:
-            self.font = pygame.font.Font("determinationmonoweb-webfont.ttf", 14)
+            self.font = pygame.font.Font("determinationmonoweb-webfont.ttf", 16)
 
-        text_wall = TextWall(self.font, self.status, self.bounds)
-        text_wall.draw(display, (255, 255, 255))
+        if self.status:
+            text_wall = TextWall(self.font, self.status, self.bounds)
+            text_wall.draw(display, (255, 255, 255))
 
     def tick(self, wm):
         new_status = self.get_status()
@@ -268,7 +269,25 @@ class TextLine:
             surface.blit(image, (new_bounds.left, new_bounds.top))
 
     def __str__(self):
-        return "TextLine<%s, %s, %s>" % (self.rect, self.line)
+        return "TextLine<%s, %s>" % (self.rect, self.line)
+
+
+def autosize_line(text, rect, font):
+    line = None
+    size = None
+    for i in range(1, len(text) + 1):
+        test_line = text[:i].strip()
+        test_size = font.size(test_line)
+        if test_size[0] < rect.width:
+            line = test_line
+            size = test_size
+        else:
+            j = text.rfind(" ", 0, i) + 1
+            line = text[:j].strip()
+            size = font.size(line)
+            return line, text[j:], size
+
+    return line, None, size
 
 def break_wrapped(surface, all_text, rect, font):
     line_spacing = -2
@@ -279,17 +298,7 @@ def break_wrapped(surface, all_text, rect, font):
 
     for text in all_text.split("\n"):
         while text:
-            i = 1
-
-            while font.size(text[:i])[0] < rect.width and i < len(text):
-                i += 1
-
-            if i < len(text):
-                i = text.rfind(" ", 0, i) + 1
-
-            line = text[:i].strip()
-
-            size = font.size(line)
+            line, text, size = autosize_line(text, rect, font)
 
             line_rect = pygame.Rect(rect.left, y, size[0], size[1] + line_spacing)
 
@@ -301,8 +310,6 @@ def break_wrapped(surface, all_text, rect, font):
                 necessary.w = size[0]
 
             necessary.h += size[1] + line_spacing
-
-            text = text[i:]
 
     return (necessary, lines)
 
