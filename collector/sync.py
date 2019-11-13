@@ -5,8 +5,6 @@ import collections
 import psycopg2
 import psycopg2.extras
 
-Summary = collections.namedtuple("Summary", "uplinks downlinks joins")
-
 class Worker:
     def start(self):
         self.thread = threading.Thread(target=self.run, args=())
@@ -21,9 +19,15 @@ class Worker:
         self.work()
         logging.info("done")
 
+class Summary(collections.namedtuple("Summary", "uplinks downlinks joins")):
+        __slots__ = ()
+        def __str__(self):
+            return "(uplinks=%d, downlinks=%d)" % (self.uplinks, self.downlinks)
+
 class Synchronizer(Worker):
-    def __init__(self, options):
+    def __init__(self, options, status):
         self.options = options
+        self.status = status
         self.tables = ["device_up", "device_ack", "device_join", "device_location", "device_status", "device_error"]
         self.thread = None
 
@@ -43,17 +47,24 @@ class Synchronizer(Worker):
         return subprocess.call(["ping", '-c', '1', "192.168.1.30"]) == 0
 
     def work(self):
+        self.status("trying")
+
         source = psycopg2.connect(self.options.source)
         destiny = psycopg2.connect(self.options.destiny)
 
         try:
+            self.status("querying summary...")
+
             summary = self.get_summary(source)
+
+            self.status("%s" % (summary,))
 
             logging.info(summary)
 
             for table in self.tables:
                 query = source.cursor()
                 try:
+                    self.status("%s syncing %s" % (summary, table))
                     logging.info("querying %s" % (table))
                     query.execute("SELECT * FROM %s" % (table))
 
@@ -68,6 +79,9 @@ class Synchronizer(Worker):
                         insertion.close()
                 finally:
                     query.close()
+            self.status("%s sync completed" % (summary,))
+        except:
+            self.status("error syncing")
         finally:
             if source: source.close()
             if destiny: destiny.close()

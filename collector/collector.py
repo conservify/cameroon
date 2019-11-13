@@ -79,7 +79,7 @@ class App:
                 logging.info("busy")
                 return
 
-        self.task = sync.Synchronizer(self.options)
+        self.task = sync.Synchronizer(self.options, self.messages.inbox())
         self.task.start()
 
     def restart(self, w):

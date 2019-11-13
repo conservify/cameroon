@@ -136,7 +136,7 @@ class Messages(WindowObject):
         self.queue.put("Hello, there! I'm ready for data, have a good and safe hike!")
 
     def inbox(self):
-        return self.queue
+        return self.queue.put
 
     def draw(self, display):
         if False: pygame.draw.rect(display, (255, 255, 255), self.bounds, 2)
