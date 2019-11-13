@@ -42,7 +42,11 @@ docker: prepare-image
 	cd container && docker build --rm -t cameroon-build .
 
 docker-build: docker
-	docker run --rm --name camtest -v `pwd`/build:/home/worker/build/temp cameroon-build
+	mkdir -p `pwd`/build/images
+	docker run --rm --name camtest \
+		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build-wifx/tmp/deploy/images \
+		--mount source=yocto-sstate-cache-camtset,target=/home/worker/yocto/poky/build-wifx/sstate-cache \
+		cameroon-build
 
 update-collector:
 	rsync -vua --progress collector pi@192.168.0.138:
