@@ -16,6 +16,8 @@ ENV LC_ALL en_US.UTF-8
 RUN useradd -ms /bin/bash worker
 WORKDIR /home/worker
 RUN mkdir -p /home/worker/build/temp
+RUN mkdir -p /home/worker/yocto/poky/build-wifx/sstate-cache
+RUN mkdir -p /home/worker/yocto/poky/build-wifx/tmp/deploy/images
 ADD yocto /home/worker
 ADD build.sh /home/worker
 RUN chown -R worker. /home/worker

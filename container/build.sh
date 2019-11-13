@@ -4,14 +4,17 @@ set -e
 
 echo BUILDING
 
-pwd
 whoami
+
+pwd
 
 ls -alh
 
 pushd yocto/poky
 
 source oe-init-build-env build-wifx
+
+pwd
 
 ls -alh
 
