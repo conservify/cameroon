@@ -59,6 +59,8 @@ IMAGE_INSTALL = "\
 	chirpstack-application-server \
 	chirpstack-network-server \
 	\
+	cameroon-ucla \
+	\
     ${CORE_IMAGE_EXTRA_INSTALL} \
     "
 

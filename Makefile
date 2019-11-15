@@ -39,11 +39,13 @@ build-image: prepare-image
 	cd $(BUILD)/yocto/poky/build-wifx && bitbake wifx-base
 
 docker: prepare-image
-	rsync -vua --progress $(BUILD)/yocto container/yocto
+	rsync -vua --progress $(BUILD)/yocto/ container/yocto/
+	rsync -vua --progress meta/ container/yocto/conservify/
 	cd container && docker build --rm -t cameroon-build .
 
 docker-build: docker
 	mkdir -p `pwd`/build/images
+	rm -rf `pwd`/build/images/rootfs
 	docker run --rm --name camtest \
 		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build-wifx/tmp/deploy/images \
 		--mount source=yocto-sstate-cache-camtset,target=/home/worker/yocto/poky/build-wifx/sstate-cache \
