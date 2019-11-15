@@ -41,7 +41,7 @@ lorix-docker:
 
 lorix-image: lorix-docker
 	mkdir -p `pwd`/build/images
-	rm -rf `pwd`/build/images/rootfs
+	rm -rf `pwd`/build/images/lorix-rootfs
 	docker run --rm --name lorix-image-build \
 		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build-wifx/tmp/deploy/images \
 		--mount source=yocto-downloads,target=/home/worker/yocto/poky/build-wifx/downloads \
@@ -53,7 +53,8 @@ pi-docker:
 
 pi-image: pi-docker
 	mkdir -p `pwd`/build/images
-	rm -rf `pwd`/build/images/rootfs
+	rm -rf `pwd`/build/images/pi-rootfs
+	rm -rf `pwd`/build/images/raspberrypi3
 	docker run --rm --name pi-image-build \
 		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build/tmp/deploy/images \
 		--mount source=yocto-downloads,target=/home/worker/yocto/poky/build/downloads \
