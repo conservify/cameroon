@@ -44,9 +44,9 @@ class Synchronizer(Worker):
         finally:
             if c: c.close()
 
-    def get_summary(self, source):
-        uplinks = self.query(source, "SELECT COUNT(*) AS uplinks FROM device_up")[0]
-        uplinks_size, joins_size = self.query(source, "SELECT pg_total_relation_size('device_up') AS uplinks_size, pg_total_relation_size('device_join') AS joins_size")
+    def get_summary(self, db):
+        uplinks = self.query(db, "SELECT COUNT(*) AS uplinks FROM device_up")[0]
+        uplinks_size, joins_size = self.query(db, "SELECT pg_total_relation_size('device_up') / (1024.0 * 1024.0) AS uplinks_size, pg_total_relation_size('device_join') / (1024.0 * 1024.0) AS joins_size")
 
         return Summary(uplinks=uplinks, joins=0, uplinks_size=uplinks_size, joins_size=joins_size)
 
@@ -68,16 +68,18 @@ class Synchronizer(Worker):
 
             self.status("querying summary...")
 
-            summary = self.get_summary(source)
+            local_summary_before = self.get_summary(destiny)
+            remote_summary = self.get_summary(source)
 
-            self.status("%s" % (summary,))
+            logging.info("local: %s" % (local_summary_before,))
+            logging.info("remote: %s" % (local_summary_before,))
 
-            logging.info(summary)
+            self.status("local: %s\nremote: %s" % (local_summary_before, remote_summary))
 
             for table in self.tables:
                 query = source.cursor()
                 try:
-                    self.status("%s syncing %s" % (summary, table))
+                    self.status("%s syncing %s" % (local_summary_before, table))
                     logging.info("querying %s" % (table))
                     query.execute("SELECT * FROM %s" % (table))
 
@@ -99,7 +101,12 @@ class Synchronizer(Worker):
 
                 finally:
                     query.close()
-            self.status("%s sync completed" % (summary,))
+
+            local_summary_after = self.get_summary(destiny)
+
+            new_uplinks = local_summary_after.uplinks - local_summary_before.uplinks
+
+            self.status("local: %s\nremote: %s\nnew uplinks: %d" % (local_summary_after, remote_summary, new_uplinks))
         except psycopg2.OperationalError as e:
             logging.info("error: %s" % (e,))
             self.status("error syncing: %s" % (e,))
@@ -110,3 +117,13 @@ class Synchronizer(Worker):
         finally:
             if source: source.close()
             if destiny: destiny.close()
+
+class Exporter(Worker):
+    def __init__(self, options, status):
+        self.options = options
+        self.status = status
+        self.thread = None
+
+    def work(self):
+        self.status("exporting")
+        self.status("done exporting")

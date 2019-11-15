@@ -34,15 +34,16 @@ class App:
         layout = Layout(window)
 
         main_buttons = [
+            wm.Button("Sync", self.sync, (50, 97, 255)),
+            wm.Button("Export", self.export, (50, 97, 255)),
             wm.Button("Restart", self.restart),
-            wm.Button("Logs", self.logs),
-            wm.Button("Sync", self.sync),
             wm.Button("Tools", self.tools),
         ]
 
         tools_buttons = [
             wm.Button("Back/Home", self.home),
             wm.Button("Restart", self.restart),
+            wm.Button("Logs", self.logs),
             wm.Button("Reboot", self.reboot, (255, 0, 0)),
         ]
 
@@ -80,6 +81,15 @@ class App:
                 return
 
         self.task = sync.Synchronizer(self.options, self.messages.inbox())
+        self.task.start()
+
+    def export(self, w):
+        if self.task:
+            if self.task.is_alive():
+                logging.info("busy")
+                return
+
+        self.task = sync.Exporter(self.options, self.messages.inbox())
         self.task.start()
 
     def restart(self, w):
