@@ -31,7 +31,7 @@ RUN mkdir -p /home/worker/yocto/poky/build-wifx/downloads
 RUN mkdir -p /home/worker/yocto/poky/build-wifx/sstate-cache
 RUN mkdir -p /home/worker/yocto/poky/build-wifx/tmp/deploy/images
 
-ADD --chown=worker:worker build-wifx poky/build-wifx
+ADD --chown=worker:worker conf poky/build-wifx/conf
 ADD --chown=worker:worker wifx-base.inc meta-wifx/recipes-wifx/images/wifx-base.inc
 ADD --chown=worker:worker build.sh /home/worker
 ADD --chown=worker:worker meta conservify

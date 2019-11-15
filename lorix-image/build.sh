@@ -43,4 +43,4 @@ fi
 
 popd
 
-echo Done!
+echo done!

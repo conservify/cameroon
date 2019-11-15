@@ -21,18 +21,6 @@ image: $(BUILD)/yocto
 $(BUILD)/poky-wifx-glibc-x86_64-wifx-base-sdk-cortexa5hf-neon-toolchain-2.1.2.tar.bz2:
 	curl https://www.lorixone.io/yocto/sdk/2.1.2/poky-wifx-glibc-x86_64-wifx-base-sdk-cortexa5hf-neon-toolchain-2.1.2.tar.bz2 -o $@
 
-docker:
-	cd lorix-image && docker build --rm -t lorix-image-build .
-
-docker-build: docker
-	mkdir -p `pwd`/build/images
-	rm -rf `pwd`/build/images/rootfs
-	docker run --rm --name lorix-image-build \
-		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build-wifx/tmp/deploy/images \
-		--mount source=yocto-downloads,target=/home/worker/yocto/poky/build-wifx/downloads \
-		--mount source=yocto-sstate-cache,target=/home/worker/yocto/poky/build-wifx/sstate-cache \
-		lorix-image-build
-
 collector-build:
 	rsync -vua --progress collector $(BUILD)
 
@@ -47,3 +35,27 @@ $(BUILD)/collector/db-read: db-read/*.go
 update-collector: collector-build collector-arm-tools
 	rsync -vua --progress combined-db/schema $(BUILD)/collector
 	rsync -vua --progress $(BUILD)/collector pi@192.168.0.138:
+
+lorix-docker:
+	cd lorix-image && docker build --rm -t lorix-image-build .
+
+lorix-image: lorix-docker
+	mkdir -p `pwd`/build/images
+	rm -rf `pwd`/build/images/rootfs
+	docker run --rm --name lorix-image-build \
+		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build-wifx/tmp/deploy/images \
+		--mount source=yocto-downloads,target=/home/worker/yocto/poky/build-wifx/downloads \
+		--mount source=yocto-sstate-cache,target=/home/worker/yocto/poky/build-wifx/sstate-cache \
+		lorix-image-build
+
+pi-docker:
+	cd pi-image && docker build --rm -t pi-image-build .
+
+pi-image: pi-docker
+	mkdir -p `pwd`/build/images
+	rm -rf `pwd`/build/images/rootfs
+	docker run --rm --name pi-image-build \
+		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build/tmp/deploy/images \
+		--mount source=yocto-downloads,target=/home/worker/yocto/poky/build/downloads \
+		--mount source=yocto-sstate-cache,target=/home/worker/yocto/poky/build/sstate-cache \
+		pi-image-build
