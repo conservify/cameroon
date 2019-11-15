@@ -21,27 +21,8 @@ image: $(BUILD)/yocto
 $(BUILD)/poky-wifx-glibc-x86_64-wifx-base-sdk-cortexa5hf-neon-toolchain-2.1.2.tar.bz2:
 	curl https://www.lorixone.io/yocto/sdk/2.1.2/poky-wifx-glibc-x86_64-wifx-base-sdk-cortexa5hf-neon-toolchain-2.1.2.tar.bz2 -o $@
 
-$(BUILD)/yocto:
-	mkdir -p $(BUILD)/yocto
-	cd $(BUILD)/yocto && git clone git://git.yoctoproject.org/poky -b krogoth
-	cd $(BUILD)/yocto && git clone git://git.openembedded.org/meta-openembedded -b krogoth
-	cd $(BUILD)/yocto && git clone git://github.com/Wifx/meta-wifx.git -b krogoth
-	cd $(BUILD)/yocto && git clone git://github.com/Wifx/meta-golang.git golang/meta-golang -b master
-	cd $(BUILD)/yocto && git clone git://git.yoctoproject.org/meta-maker -b master
-	cd $(BUILD)/yocto/meta-maker && git checkout -b working c039fafa7a0276769d0928d16bdacd2012f2aff6
-	cd $(BUILD)/yocto && git clone git://github.com/brocaar/chirpstack-gateway-os.git
-
-prepare-image: $(BUILD)/yocto
-	cp wifx-base.inc $(BUILD)/yocto/meta-wifx/recipes-wifx/images/wifx-base.inc
-	rm -rf $(BUILD)/yocto/poky/build-wifx && cp -ar build-wifx $(BUILD)/yocto/poky
-
-build-image: prepare-image
-	cd $(BUILD)/yocto/poky/build-wifx && bitbake wifx-base
-
-docker: prepare-image
-	rsync -vua --progress $(BUILD)/yocto/ container/yocto/
-	rsync -vua --progress meta/ container/yocto/conservify/
-	cd container && docker build --rm -t cameroon-build .
+docker:
+	cd lorix-image && docker build --rm -t lorix-image-build .
 
 docker-build: docker
 	mkdir -p `pwd`/build/images
@@ -49,7 +30,7 @@ docker-build: docker
 	docker run --rm --name camtest \
 		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build-wifx/tmp/deploy/images \
 		--mount source=yocto-sstate-cache-camtset,target=/home/worker/yocto/poky/build-wifx/sstate-cache \
-		cameroon-build
+		lorix-image-build
 
 collector-build:
 	rsync -vua --progress collector $(BUILD)

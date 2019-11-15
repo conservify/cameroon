@@ -2,17 +2,9 @@
 
 set -xe
 
-whoami
-
-ls -alh
-
 pushd yocto/poky
 
-ls -alh
-
 source oe-init-build-env build-wifx
-
-# time bitbake cameroon-ucla
 
 time bitbake wifx-base
 
