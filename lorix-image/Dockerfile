@@ -27,6 +27,7 @@ RUN git clone git://github.com/Wifx/meta-golang.git golang/meta-golang -b master
 RUN git clone git://git.yoctoproject.org/meta-maker -b master && cd meta-maker && git checkout -b working c039fafa7a0276769d0928d16bdacd2012f2aff6
 RUN git clone git://github.com/brocaar/chirpstack-gateway-os.git
 
+RUN mkdir -p /home/worker/yocto/poky/build-wifx/downloads
 RUN mkdir -p /home/worker/yocto/poky/build-wifx/sstate-cache
 RUN mkdir -p /home/worker/yocto/poky/build-wifx/tmp/deploy/images
 
