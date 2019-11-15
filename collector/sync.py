@@ -86,10 +86,17 @@ class Synchronizer(Worker):
                     values = ["%s"] * num_fields
                     insertionQuery = "INSERT INTO %s (%s) VALUES (%s) ON CONFLICT DO NOTHING" % (table, ", ".join(names), ", ".join(values))
 
+                    nrows = 0
                     for row in query.fetchall():
                         insertion = destiny.cursor()
                         insertion.execute(insertionQuery, row)
                         insertion.close()
+                        nrows += 1
+
+                    destiny.commit()
+
+                    logging.info("done after %d rows" % (nrows,))
+
                 finally:
                     query.close()
             self.status("%s sync completed" % (summary,))
