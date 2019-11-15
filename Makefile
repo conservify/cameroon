@@ -27,9 +27,10 @@ docker:
 docker-build: docker
 	mkdir -p `pwd`/build/images
 	rm -rf `pwd`/build/images/rootfs
-	docker run --rm --name camtest \
+	docker run --rm --name lorix-image-build \
 		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build-wifx/tmp/deploy/images \
-		--mount source=yocto-sstate-cache-camtset,target=/home/worker/yocto/poky/build-wifx/sstate-cache \
+		--mount source=yocto-downloads,target=/home/worker/yocto/poky/build-wifx/downloads \
+		--mount source=yocto-sstate-cache,target=/home/worker/yocto/poky/build-wifx/sstate-cache \
 		lorix-image-build
 
 collector-build:
