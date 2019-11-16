@@ -2,7 +2,10 @@ BUILD := build
 TEST_SOURCE := postgres://loraserver_as_data:asdfasdf@192.168.0.30/loraserver_as_data
 TEST_DESTINATION := postgres://lora-combined:asdfasdf@127.0.0.1/lora-combined?sslmode=disable
 
-all: $(BUILD)/db-sync $(BUILD)/db-read image
+all: $(BUILD)/db-sync $(BUILD)/db-read lorix-image pi-image
+
+clean:
+	rm -rf $(BUILD)
 
 $(BUILD)/db-sync: db-sync/*.go
 	go build -o $@ $^
@@ -15,11 +18,6 @@ test-sync: all
 
 test-read: all
 	$(BUILD)/db-read --url $(TEST_DESTINATION)
-
-image: $(BUILD)/yocto
-
-$(BUILD)/poky-wifx-glibc-x86_64-wifx-base-sdk-cortexa5hf-neon-toolchain-2.1.2.tar.bz2:
-	curl https://www.lorixone.io/yocto/sdk/2.1.2/poky-wifx-glibc-x86_64-wifx-base-sdk-cortexa5hf-neon-toolchain-2.1.2.tar.bz2 -o $@
 
 collector-build:
 	rsync -vua --progress collector $(BUILD)
