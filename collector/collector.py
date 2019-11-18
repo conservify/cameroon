@@ -55,6 +55,9 @@ class App:
 
         self.messages = wm.Messages(layout.messages)
 
+        self.monitor = sync.Monitor(self.options, self.messages.inbox())
+        self.monitor.start()
+
         window.add(self.main_menu)
         window.add(self.tools_menu)
         window.add(self.messages)

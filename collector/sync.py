@@ -1,7 +1,14 @@
+import os
 import sys
 import logging
 import threading
 import collections
+import subprocess
+import blkinfo
+import pyudev
+import json
+import time
+import tempfile
 
 import psycopg2
 import psycopg2.extras
@@ -117,6 +124,81 @@ class Synchronizer(Worker):
         finally:
             if source: source.close()
             if destiny: destiny.close()
+
+class Monitor(Worker):
+    def __init__(self, options, status):
+        self.options = options
+        self.status = status
+        self.thread = None
+        self.context = pyudev.Context()
+        self.monitor = pyudev.Monitor.from_netlink(self.context)
+        self.monitor.filter_by(subsystem='usb')
+        self.seen = {}
+
+    def work(self):
+        while True:
+            time.sleep(1)
+
+            try:
+                found = {}
+                for device in self.context.list_devices(subsystem='block', DEVTYPE='partition'):
+                    dev_name = device.get('DEVNAME')
+                    if device.get('ID_USB_DRIVER'):
+                        if dev_name not in self.seen:
+                            logging.info("{} {} {}".format(dev_name, device.get('DEVTYPE'), device.get('ID_USB_DRIVER')))
+                            self.copy_to(dev_name)
+                        self.seen[dev_name] = True
+                        found[dev_name] = True
+
+                remove = []
+                for dev_name in self.seen.keys():
+                    if dev_name not in found:
+                        remove.append(dev_name)
+                for dev_name in remove:
+                    logging.info("removed %s" % (dev_name,))
+                    self.status("removed %s!" % (device,))
+                    del self.seen[dev_name]
+            except:
+                e = sys.exc_info()[0]
+                logging.info("error: %s" % (e,))
+
+    def mount_device(self, device):
+        mp = tempfile.mkdtemp()
+        logging.info("mounting %s on %s" % (device, mp))
+
+        m = subprocess.call(["mount", device, mp])
+        if m != 0:
+            os.rmdir(mp)
+            logging.info('mounting failed %s' % (m,))
+            return None
+
+        return mp
+
+    def unmount(self, mp):
+        if subprocess.call(["umount", mp]) != 0:
+            logging.info('unmounting failed')
+        try:
+            os.rmdir(mp)
+        except:
+            e = sys.exc_info()[0]
+            logging.info("error: %s" % (e,))
+
+    def copy_to(self, device):
+        self.status("exporting to %s..." % (device,))
+
+        mp = self.mount_device(device)
+        if not mp:
+            return False
+
+        try:
+            logging.info("done!")
+            self.status("successfully exported to %s!" % (device,))
+            return True
+        except:
+            e = sys.exc_info()[0]
+            logging.info("error: %s" % (e,))
+        finally:
+            self.unmount(mp)
 
 class Exporter(Worker):
     def __init__(self, options, status):
