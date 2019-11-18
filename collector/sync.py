@@ -72,7 +72,7 @@ class Synchronizer(Worker):
             remote_summary = self.get_summary(source)
 
             logging.info("local: %s" % (local_summary_before,))
-            logging.info("remote: %s" % (local_summary_before,))
+            logging.info("remote: %s" % (remote_summary,))
 
             self.status("local: %s\nremote: %s" % (local_summary_before, remote_summary))
 
