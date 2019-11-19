@@ -9,6 +9,7 @@ import pyudev
 import json
 import time
 import tempfile
+import shutil
 
 import psycopg2
 import psycopg2.extras
@@ -155,57 +156,64 @@ class Monitor(Worker):
                     if dev_name not in found:
                         remove.append(dev_name)
                 for dev_name in remove:
-                    logging.info("removed %s" % (dev_name,))
-                    self.status("removed %s!" % (device,))
+                    self.status("removed %s!" % (dev_name,))
                     del self.seen[dev_name]
             except:
                 e = sys.exc_info()[0]
-                logging.info("error: %s" % (e,))
+                self.status("error: %s" % (e,))
 
-    def mount_device(self, device):
+    def mount(self, device):
         mp = tempfile.mkdtemp()
-        logging.info("mounting %s on %s" % (device, mp))
+        self.status("mounting %s on %s" % (device, mp))
 
         m = subprocess.call(["mount", device, mp])
         if m != 0:
             os.rmdir(mp)
-            logging.info('mounting failed %s' % (m,))
+            self.status('mounting failed %s' % (m,))
             return None
 
         return mp
 
     def unmount(self, mp):
         if subprocess.call(["umount", mp]) != 0:
-            logging.info('unmounting failed')
+            self.status('unmounting failed')
         try:
             os.rmdir(mp)
         except:
             e = sys.exc_info()[0]
-            logging.info("error: %s" % (e,))
+            self.status("error: %s" % (e,))
 
     def copy_to(self, device):
         self.status("exporting to %s..." % (device,))
 
-        mp = self.mount_device(device)
+        mp = self.mount(device)
         if not mp:
             return False
 
         try:
-            logging.info("done!")
+            exporter = Exporter(self.options, self.status)
+            exporter.export(mp)
+
+            self.local_backup(mp)
+
             self.status("successfully exported to %s!" % (device,))
+
             return True
         except:
             e = sys.exc_info()[0]
-            logging.info("error: %s" % (e,))
+            self.status("error: %s" % (e,))
         finally:
             self.unmount(mp)
 
-class Exporter(Worker):
+    def local_backup(self, mp):
+        subprocess.call(["rsync", "-vua", "--delete", mp + "/", "/tmp/backup/"])
+
+class Exporter:
     def __init__(self, options, status):
         self.options = options
         self.status = status
-        self.thread = None
 
-    def work(self):
-        self.status("exporting")
-        self.status("done exporting")
+    def export(self, path):
+        fn = time.strftime("lora_%Y%m%d_%H%M%S.csv")
+        with open(os.path.join(path, fn), 'w') as f:
+            f.write('HELLO\n')

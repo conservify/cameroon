@@ -65,7 +65,7 @@ class App:
         window.run()
 
     def stop(self):
-        self.s.stop()
+        pass
 
     def home(self, w):
         self.tools_menu.hide()

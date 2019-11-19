@@ -154,6 +154,7 @@ class Messages(WindowObject):
         while not self.queue.empty():
             new_status = self.queue.get()
             if self.status != new_status:
+                logging.info(new_status)
                 self.status = new_status
                 dirty = True
         return dirty
