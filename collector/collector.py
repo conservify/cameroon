@@ -161,7 +161,7 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
 
     os.putenv('SDL_VIDEODRIVER', 'fbcon')
-    os.putenv('SDL_FBDEV', '/dev/fb0')
+    os.putenv('SDL_FBDEV', '/dev/fb1')
 
     app.run()
 

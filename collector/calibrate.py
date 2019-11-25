@@ -68,4 +68,7 @@ def calibrate():
 
 
 if __name__=='__main__':
+    os.putenv('SDL_VIDEODRIVER', 'fbcon')
+    os.putenv('SDL_FBDEV', '/dev/fb1')
+
     calibrate()
