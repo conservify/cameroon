@@ -37,4 +37,3 @@ ADD --chown=worker:worker build.sh /home/worker
 ADD --chown=worker:worker meta conservify
 
 WORKDIR /home/worker
-CMD [ "./build.sh" ]
