@@ -4,20 +4,26 @@ set -xe
 
 pushd yocto/poky
 
+pwd
+
+set +x
 source oe-init-build-env build-wifx
+set -x
+
+sed -i 's/BB_NO_NETWORK = "0"/BB_NO_NETWORK = "1"/' conf/local.conf
+
+cp /home/worker/yocto/meta-wifx/recipes-bsp/u-boot/u-boot-at91_2017.03.bb tmp/deploy/images
 
 time bitbake wifx-base
 
-ls -alh
-
 pwd
 
-IMAGES=`pwd`/tmp/deploy/images
+ls -alh
 
-ROOTFS=`find . -name rootfs`
+IMAGES=`pwd`/tmp/deploy/images
+ROOTFS=`pwd`/tmp/work/*/*/*/rootfs/
 
 for rpm in `find tmp/work/cortexa5hf-neon-poky-linux-gnueabi -name "*cameroon*.rpm"`; do
-	echo $rpm
 	cp $rpm $IMAGES
 done
 

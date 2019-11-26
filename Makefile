@@ -44,7 +44,7 @@ lorix-image: lorix-docker
 		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build-wifx/tmp/deploy/images \
 		--mount source=yocto-downloads,target=/home/worker/yocto/poky/build-wifx/downloads \
 		--mount source=yocto-sstate-cache,target=/home/worker/yocto/poky/build-wifx/sstate-cache \
-		lorix-image-build
+		lorix-image-build ./build.sh
 
 pi-docker:
 	cd pi-image && docker build --rm -t pi-image-build .
@@ -57,4 +57,4 @@ pi-image: pi-docker
 		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build/tmp/deploy/images \
 		--mount source=yocto-downloads,target=/home/worker/yocto/poky/build/downloads \
 		--mount source=yocto-sstate-cache,target=/home/worker/yocto/poky/build/sstate-cache \
-		pi-image-build
+		pi-image-build ./build.sh

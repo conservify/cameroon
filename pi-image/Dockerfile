@@ -33,4 +33,3 @@ ADD --chown=worker:worker conf /home/worker/yocto/poky/build/conf
 ADD --chown=worker:worker build.sh /home/worker
 
 WORKDIR /home/worker
-CMD [ "./build.sh" ]
