@@ -1,6 +1,7 @@
 BUILD := build
 TEST_SOURCE := postgres://loraserver_as_data:asdfasdf@192.168.0.30/loraserver_as_data
 TEST_DESTINATION := postgres://lora-combined:asdfasdf@127.0.0.1/lora-combined?sslmode=disable
+PI := 192.168.0.159
 
 all: $(BUILD)/db-sync $(BUILD)/db-read lorix-image pi-image
 
@@ -31,8 +32,7 @@ $(BUILD)/collector/db-read: db-read/*.go
 	env GOOS=linux GOARCH=arm go build -o $@ $^
 
 update-collector: collector-build collector-arm-tools
-	rsync -vua --progress combined-db/schema $(BUILD)/collector
-	rsync -vua --progress $(BUILD)/collector pi@192.168.0.138:
+	rsync -vua --progress $(BUILD)/collector pi@$(PI):
 
 lorix-docker:
 	cd lorix-image && docker build --rm -t lorix-image-build .

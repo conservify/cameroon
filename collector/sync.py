@@ -116,11 +116,11 @@ class Synchronizer(Worker):
 
             self.status("local: %s\nremote: %s\nnew uplinks: %d" % (local_summary_after, remote_summary, new_uplinks))
         except psycopg2.OperationalError as e:
-            logging.info("error: %s" % (e,))
+            logging.exception("error")
             self.status("error syncing: %s" % (e,))
         except:
+            logging.exception("error")
             e = sys.exc_info()[0]
-            logging.info("error: %s" % (e,))
             self.status("error syncing: %s" % (e,))
         finally:
             if source: source.close()
@@ -159,8 +159,7 @@ class Monitor(Worker):
                     self.status("removed %s!" % (dev_name,))
                     del self.seen[dev_name]
             except:
-                e = sys.exc_info()[0]
-                self.status("error: %s" % (e,))
+                logging.exception("error")
 
     def mount(self, device):
         mp = tempfile.mkdtemp()
@@ -200,6 +199,7 @@ class Monitor(Worker):
 
             return True
         except:
+            logging.exception("error")
             e = sys.exc_info()[0]
             self.status("error: %s" % (e,))
         finally:
