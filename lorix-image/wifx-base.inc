@@ -49,18 +49,19 @@ IMAGE_INSTALL = "\
     ttn-packet-forwarder \
     kersing-packet-forwarder \
     clouds-manager \
-	\
-	vim \
-	tmux \
-	\
-	postgresql \
-	\
-	chirpstack-gateway-bridge \
-	chirpstack-application-server \
-	chirpstack-network-server \
-	\
-	cameroon-ucla \
-	\
+    \
+    vim \
+    tmux \
+    \
+    postgresql \
+    \
+    chirpstack-gateway-bridge \
+    mosquitto \
+    chirpstack-application-server \
+    chirpstack-network-server \
+    \
+    cameroon-ucla \
+    \
     ${CORE_IMAGE_EXTRA_INSTALL} \
     "
 
