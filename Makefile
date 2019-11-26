@@ -3,7 +3,9 @@ TEST_SOURCE := postgres://loraserver_as_data:asdfasdf@192.168.0.30/loraserver_as
 TEST_DESTINATION := postgres://lora-combined:asdfasdf@127.0.0.1/lora-combined?sslmode=disable
 PI := 192.168.0.159
 
-all: $(BUILD)/db-sync $(BUILD)/db-read lorix-image pi-image
+all: binaries lorix-image pi-image
+
+binaries: $(BUILD)/db-sync $(BUILD)/db-read
 
 clean:
 	rm -rf $(BUILD)
@@ -14,10 +16,10 @@ $(BUILD)/db-sync: db-sync/*.go
 $(BUILD)/db-read: db-read/*.go
 	go build -o $@ $^
 
-test-sync: all
+test-sync: binaries
 	$(BUILD)/db-sync --source $(TEST_SOURCE) --destination $(TEST_DESTINATION)
 
-test-read: all
+test-read: binaries
 	$(BUILD)/db-read --url $(TEST_DESTINATION)
 
 collector-build:
