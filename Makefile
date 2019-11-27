@@ -45,10 +45,15 @@ lorix-image/meta/recipes-conservify/cameroon-ucla/files/id_rsa lorix-image/meta/
 lorix-keys: lorix-image/meta/recipes-conservify/cameroon-ucla/files/id_rsa lorix-image/meta/recipes-conservify/cameroon-ucla/files/id_rsa.pub lorix-image/meta/recipes-conservify/cameroon-ucla/files/authorized_keys
 
 lorix-image: lorix-keys lorix-docker
+	rm -rf `pwd`/build/sysroots
 	mkdir -p `pwd`/build/images
+	mkdir -p `pwd`/build/work
+	mkdir -p `pwd`/build/sysroots
 	rm -rf `pwd`/build/images/lorix-rootfs
 	docker run --rm --name lorix-image-build \
 		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build-wifx/tmp/deploy/images \
+		--mount type=bind,source=`pwd`/build/sysroots,target=/home/worker/yocto/poky/build-wifx/tmp/sysroots \
+		--mount type=bind,source=`pwd`/build/work,target=/home/worker/yocto/poky/build-wifx/tmp/work \
 		--mount source=yocto-downloads,target=/home/worker/yocto/poky/build-wifx/downloads \
 		--mount source=yocto-sstate-cache,target=/home/worker/yocto/poky/build-wifx/sstate-cache \
 		lorix-image-build ./build.sh
@@ -57,11 +62,16 @@ pi-docker:
 	cd pi-image && docker build --rm -t pi-image-build .
 
 pi-image: pi-docker
+	rm -rf `pwd`/build/sysroots
 	mkdir -p `pwd`/build/images
+	mkdir -p `pwd`/build/work
+	mkdir -p `pwd`/build/sysroots
 	rm -rf `pwd`/build/images/pi-rootfs
 	rm -rf `pwd`/build/images/raspberrypi3
 	docker run --rm --name pi-image-build \
 		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build/tmp/deploy/images \
+		--mount type=bind,source=`pwd`/build/sysroots,target=/home/worker/yocto/poky/build/tmp/sysroots \
+		--mount type=bind,source=`pwd`/build/work,target=/home/worker/yocto/poky/build/tmp/work \
 		--mount source=yocto-downloads,target=/home/worker/yocto/poky/build/downloads \
 		--mount source=yocto-sstate-cache,target=/home/worker/yocto/poky/build/sstate-cache \
 		pi-image-build ./build.sh
