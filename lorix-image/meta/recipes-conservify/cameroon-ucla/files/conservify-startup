@@ -32,6 +32,15 @@ function do_start {
 		CREATE USER chirpstack_as_data WITH ENCRYPTED PASSWORD 'password';
 		CREATE DATABASE chirpstack_as_data OWNER chirpstack_as_data;
 		GRANT ALL PRIVILEGES ON DATABASE chirpstack_as_data TO chirpstack_as_data;
+
+		\c chirpstack_as
+		CREATE EXTENSION pg_trgm;
+
+		\c chirpstack_ns
+		CREATE EXTENSION pg_trgm;
+
+		\c chirpstack_as_data
+		CREATE EXTENSION pg_trgm;
 EOF
 	fi
 }
