@@ -63,6 +63,7 @@ IMAGE_INSTALL = "\
     chirpstack-application-server \
     chirpstack-network-server \
     mosquitto \
+    mosquitto-clients \
     \
     cameroon-ucla \
     \
