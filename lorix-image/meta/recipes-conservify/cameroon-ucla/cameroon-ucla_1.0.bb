@@ -33,7 +33,12 @@ do_install() {
 
 	install -d ${D}/etc/init.d
 	install -m 0755 ${S}/conservify-startup ${D}/etc/init.d/conservify-startup
+
 	install -d ${D}/etc/rc3.d
 	cd ${D}/etc/rc3.d
+	ln -s ../init.d/conservify-startup S10conservify-startup
+
+	install -d ${D}/etc/rc5.d
+	cd ${D}/etc/rc5.d
 	ln -s ../init.d/conservify-startup S10conservify-startup
 }
