@@ -38,11 +38,9 @@ else
 
 	pushd $ROOTFS
 
-	pwd
+	# rm -f ${IMAGES}/rootfs.tar.bz2
 
-	rm -f ${IMAGES}/rootfs.tar.bz2
-
-	tar cpjf ${IMAGES}/rootfs.tar.bz2 .
+	# tar cpjf ${IMAGES}/rootfs.tar.bz2 .
 
 	popd
 fi
