@@ -66,6 +66,12 @@ pi-image: pi-docker
 		--mount source=yocto-sstate-cache,target=/home/worker/yocto/poky/build/sstate-cache \
 		pi-image-build ./build.sh
 
+lorix-build-shell: lorix-docker
+	docker run -it --rm --name lorix-image-shell lorix-image-build /bin/bash
+
+pi-build-shell: pi-docker
+	docker run -it --rm --name pi-image-shell pi-image-build /bin/bash
+
 lorix-flash-ready:
 	if [ ! -d $(BUILD)/sam-ba_3.1.4 ]; then                                    \
 		cd $(BUILD) && tar xf ../lorix-flash/sam-ba_3.1.4-linux_x86_64.tar.gz; \
