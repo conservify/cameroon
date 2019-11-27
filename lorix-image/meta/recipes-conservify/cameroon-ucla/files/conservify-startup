@@ -13,6 +13,28 @@
 #
 ### END INIT INFO
 
+function apply_migrations {
+	dir="$1"
+	pgurl="$2"
+
+	echo applying migrations in ${dir}
+
+	completed=${dir}/.completed
+	mkdir -p ${completed}
+
+	for file in `find ${dir} -maxdepth 1 -type f -iname "*.sql"`; do
+		echo applying $file
+		sudo -u postgres psql ${pgurl} -f ${file} && mv ${file} ${completed}
+	done
+}
+
+function do_migrate {
+	apply_migrations "/etc/conservify-schema/postgres" ""
+	apply_migrations "/etc/conservify-schema/chirpstack_as" "postgres://chirpstack_as:password@127.0.0.1/chirpstack_as?sslmode=disable"
+	apply_migrations "/etc/conservify-schema/chirpstack_as_data" "postgres://chirpstack_as_data:password@127.0.0.1/chirpstack_as_data?sslmode=disable"
+	apply_migrations "/etc/conservify-schema/chirpstack_ns" "postgres://chirpstack_ns:password@127.0.0.1/chirpstack_ns?sslmode=disable"
+}
+
 function do_start {
 	if [ ! -f /var/lib/postgresql/data/pg_hba.conf ]; then
 		/usr/bin/postgresql-setup initdb
@@ -20,23 +42,9 @@ function do_start {
 		sed -i 's/ident/md5/g' /var/lib/postgresql/data/pg_hba.conf
 
 		/etc/init.d/postgresql-server start
-
-		for a in /etc/conservify-schema/postgres/*; do
-			sudo -u postgres psql -f $a
-		done
-
-		for a in /etc/conservify-schema/chirpstack_as/*; do
-			psql "postgres://chirpstack_as:password@127.0.0.1/chirpstack_as?sslmode=disable" -f $a
-		done
-
-		for a in /etc/conservify-schema/chirpstack_as_data/*; do
-			psql "postgres://chirpstack_as_data:password@127.0.0.1/chirpstack_as_data?sslmode=disable" -f $a
-		done
-
-		for a in /etc/conservify-schema/chirpstack_ns/*; do
-			psql "postgres://chirpstack_ns:password@127.0.0.1/chirpstack_ns?sslmode=disable" -f $a
-		done
 	fi
+
+	do_migrate
 }
 
 case "$1" in
