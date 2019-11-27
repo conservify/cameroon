@@ -46,13 +46,24 @@ do_install() {
 	install -m 0644 ${S}/logrotations ${D}/etc/logrotate.d/logrotations
 
 	install -d ${D}/etc/conservify-schema
+
 	install -d ${D}/etc/conservify-schema/postgres
+	for f in ${S}/schema/postgres/*.sql; do
+		install -m 0644 $f ${D}/etc/conservify-schema/postgres/
+	done
 
 	install -d ${D}/etc/conservify-schema/chirpstack_as
-	install -m 0644 ${S}/schema/postgres/001_configure.sql ${D}/etc/conservify-schema/postgres/001_configure.sql
+	for f in ${S}/schema/chirpstack_as/*.sql; do
+		install -m 0644 $f ${D}/etc/conservify-schema/chirpstack_as/
+	done
 
 	install -d ${D}/etc/conservify-schema/chirpstack_as_data
-	install -m 0644 ${S}/schema/chirpstack_as_data/001_schema.sql ${D}/etc/conservify-schema/chirpstack_as_data/001_schema.sql
+	for f in ${S}/schema/chirpstack_as_data/*.sql; do
+		install -m 0644 $f ${D}/etc/conservify-schema/chirpstack_as_data/
+	done
 
 	install -d ${D}/etc/conservify-schema/chirpstack_ns
+	for f in ${S}/schema/chirpstack_ns/*.sql; do
+		install -m 0644 $f ${D}/etc/conservify-schema/chirpstack_ns/
+	done
 }
