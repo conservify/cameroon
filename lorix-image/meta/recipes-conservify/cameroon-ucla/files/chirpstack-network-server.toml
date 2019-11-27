@@ -113,6 +113,7 @@ net_id="000000"
     # (which could be frequency hopping).
     ping_slot_frequency=0
 
+	# Conservify: This seems to be too aggressive? Need to dig into this more.
     disable_adr=true
 
 
