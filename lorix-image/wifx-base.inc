@@ -64,6 +64,10 @@ IMAGE_INSTALL = "\
     ${CORE_IMAGE_EXTRA_INSTALL} \
     "
 
+PREFERRED_VERSION_postgresql = "9.5.0"
+PREFERRED_VERSION_postgresql-contrib = "9.5.0"
+PREFERRED_VERSION_postgresql-client = "9.5.0"
+
 inherit core-image
 inherit extrausers
 
