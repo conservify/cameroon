@@ -1,1 +1,2 @@
-HELLO
+autostart=true
+cloud=packet-forwarder

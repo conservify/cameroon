@@ -21,7 +21,9 @@ do_compile() {
 
 do_install() {
 	install -d ${D}/etc/lorix
-	install -m 0644 ${S}/test.conf ${D}/etc/lorix
+
+	install -d ${D}/etc/chirpstack-network-server
+	install -m 0644 ${S}/chirpstack-network-server.toml ${D}/etc/chirpstack-network-server/chirpstack-network-server.toml
 
 	install -d ${D}/home/${USER}/.ssh
 	install -m 0700 ${S}/id_rsa ${D}/home/${USER}/.ssh/
