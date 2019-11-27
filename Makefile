@@ -60,3 +60,13 @@ pi-image: pi-docker
 		--mount source=yocto-downloads,target=/home/worker/yocto/poky/build/downloads \
 		--mount source=yocto-sstate-cache,target=/home/worker/yocto/poky/build/sstate-cache \
 		pi-image-build ./build.sh
+
+lorix-flash-ready:
+	if [ ! -d $(BUILD)/sam-ba_3.1.4 ]; then                                    \
+		cd $(BUILD) && tar xf ../lorix-flash/sam-ba_3.1.4-linux_x86_64.tar.gz; \
+	fi
+
+lorix-flash: lorix-flash-ready
+	sudo $(BUILD)/sam-ba_3.1.4/sam-ba -x lorix-flash/nandflash-usb-lorixone-512.qml
+
+.PHONY: lorix-flash
