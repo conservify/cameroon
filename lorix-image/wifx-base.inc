@@ -43,9 +43,13 @@ IMAGE_INSTALL = "\
     \
     reset-lgw \
     factory-reset \
+    lora-gateway \
     update-gwid \
+    loriot \
     packet-forwarder \
     ttn-packet-forwarder \
+	kersing-packet-forwarder \
+    clouds-manager \
     \
     vim \
     tmux \
