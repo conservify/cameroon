@@ -31,6 +31,7 @@ IMAGE_INSTALL = "\
     gdbserver \
     usbutils \
     wget \
+	rsync \
     ntp \
     \
     openssl \
