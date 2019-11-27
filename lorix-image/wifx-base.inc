@@ -50,11 +50,14 @@ IMAGE_INSTALL = "\
     tmux \
     \
     postgresql \
+    postgresql-contrib \
+    postgresql-client \
+    redis \
     \
     chirpstack-gateway-bridge \
-    mosquitto \
     chirpstack-application-server \
     chirpstack-network-server \
+    mosquitto \
     \
     cameroon-ucla \
     \

@@ -19,7 +19,7 @@ password_hash_iterations=100000
 #
 # Besides using an URL (e.g. 'postgres://user:password@hostname/database?sslmode=disable')
 # it is also possible to use the following format:
-# 'user=loraserver dbname=loraserver sslmode=disable'.
+# 'user=chirpstack dbname=chirpstack sslmode=disable'.
 #
 # The following connection parameters are supported:
 #
@@ -41,8 +41,7 @@ password_hash_iterations=100000
 # * require - Always SSL (skip verification)
 # * verify-ca - Always SSL (verify that the certificate presented by the server was signed by a trusted CA)
 # * verify-full - Always SSL (verify that the certification presented by the server was signed by a trusted CA and the server host name matches the one in the certificate)
-#dsn="postgres://localhost/loraserver_as?sslmode=disable"
-dsn="postgres://loraserver_as:dbpassword@localhost/loraserver_as?sslmode=disable"
+dsn="postgres://chirpstack_as:password@127.0.0.1/chirpstack_as?sslmode=disable"
 
 # Automatically apply database migrations.
 #
@@ -62,7 +61,7 @@ automigrate=true
 #
 # For more information about the Redis URL format, see:
 # https://www.iana.org/assignments/uri-schemes/prov/redis
-url="redis://localhost:6379"
+url="redis://127.0.0.1:6379"
 
 # Max idle connections in the pool.
 max_idle=10
@@ -144,7 +143,7 @@ id="6d5db27e-4ce2-4b2b-b5d7-91f069397978"
   location_retained_message=false
 
   # MQTT server (e.g. scheme://host:port where scheme is tcp, ssl or ws)
-  server="tcp://localhost:1883"
+  server="tcp://127.0.0.1:1883"
 
   # Connect with the given username (optional)
   username=""
@@ -266,11 +265,11 @@ id="6d5db27e-4ce2-4b2b-b5d7-91f069397978"
   # this to the host:ip on which LoRa Server can reach LoRa App Server.
   # The port must be equal to the port configured by the 'bind' flag
   # above.
-  public_host="localhost:8001"
+  public_host="127.0.0.1:8001"
 
   [application_server.integration.postgresql]
   # PostgreSQL dsn (e.g.: postgres://user:password@hostname/database?sslmode=disable).
-  dsn="postgres://loraserver_as_data:asdfasdf@localhost/loraserver_as_data?sslmode=disable"
+  dsn="postgres://chirpstack_as_data:password@127.0.0.1/chirpstack_as_data?sslmode=disable"
 
   # Settings for the "external api"
   #

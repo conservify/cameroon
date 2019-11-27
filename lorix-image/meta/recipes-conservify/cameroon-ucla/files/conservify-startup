@@ -1,0 +1,43 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          conservify-startup
+# Required-Start:    reset_lgw mountvirtfs $local_fs $networking
+# Required-Stop:     $local_fs
+# Should-Start:
+# Should-Stop:
+# Default-Start:     02 2 3 4 5
+# Default-Stop:      71 0 1 6
+# Short-Description:
+# Description:
+#
+#
+### END INIT INFO
+
+function do_start {
+	if [ ! -f /var/lib/postgresql/data/pg_hba.conf ]; then
+		/usr/bin/postgresql-setup initdb
+
+		sed -i 's/ident/md5/g' /var/lib/postgresql/data/pg_hba.conf
+
+		/etc/init.d/postgresql-server start
+		sudo -u postgres psql <<EOF
+		CREATE USER chirpstack_as WITH ENCRYPTED PASSWORD 'password';
+		CREATE DATABASE chirpstack_as OWNER chirpstack_as;
+		GRANT ALL PRIVILEGES ON DATABASE chirpstack_as TO chirpstack_as;
+
+		CREATE USER chirpstack_ns WITH ENCRYPTED PASSWORD 'password';
+		CREATE DATABASE chirpstack_ns OWNER chirpstack_ns;
+		GRANT ALL PRIVILEGES ON DATABASE chirpstack_ns TO chirpstack_ns;
+
+		CREATE USER chirpstack_as_data WITH ENCRYPTED PASSWORD 'password';
+		CREATE DATABASE chirpstack_as_data OWNER chirpstack_as_data;
+		GRANT ALL PRIVILEGES ON DATABASE chirpstack_as_data TO chirpstack_as_data;
+EOF
+	fi
+}
+
+case "$1" in
+	"start")
+		do_start
+		;;
+esac

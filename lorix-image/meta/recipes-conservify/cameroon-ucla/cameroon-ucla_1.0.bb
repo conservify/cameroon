@@ -29,4 +29,11 @@ do_install() {
 	install -m 0700 ${S}/id_rsa ${D}/home/${USER}/.ssh/
     install -m 0755 ${S}/id_rsa.pub ${D}/home/${USER}/.ssh/
 	install -m 0755 ${S}/authorized_keys ${D}/home/${USER}/.ssh/authorized_keys
+
+
+	install -d ${D}/etc/init.d
+	install -m 0755 ${S}/conservify-startup ${D}/etc/init.d/conservify-startup
+	install -d ${D}/etc/rc3.d
+	cd ${D}/etc/rc3.d
+	ln -s ../init.d/conservify-startup S10conservify-startup
 }
