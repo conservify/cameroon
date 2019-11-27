@@ -39,7 +39,12 @@ update-collector: collector-build collector-arm-tools
 lorix-docker:
 	cd lorix-image && docker build --rm -t lorix-image-build .
 
-lorix-image: lorix-docker
+lorix-image/meta/recipes-conservify/cameroon-ucla/files/id_rsa lorix-image/meta/recipes-conservify/cameroon-ucla/files/id_rsa.pub lorix-image/meta/recipes-conservify/cameroon-ucla/files/authorized_keys:
+	echo missing ssh keys
+
+lorix-keys: lorix-image/meta/recipes-conservify/cameroon-ucla/files/id_rsa lorix-image/meta/recipes-conservify/cameroon-ucla/files/id_rsa.pub lorix-image/meta/recipes-conservify/cameroon-ucla/files/authorized_keys
+
+lorix-image: lorix-keys lorix-docker
 	mkdir -p `pwd`/build/images
 	rm -rf `pwd`/build/images/lorix-rootfs
 	docker run --rm --name lorix-image-build \

@@ -1,3 +1,6 @@
 *.pgdump
 *.pyc
 build
+id_rsa
+id_rsa.pub
+authorized_keys
