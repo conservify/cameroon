@@ -7,7 +7,6 @@
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -15,38 +14,36 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+SET default_tablespace = '';
+SET default_with_oids = false;
 
 --
 -- Name: hstore; Type: EXTENSION; Schema: -; Owner:
 --
 
-CREATE EXTENSION IF NOT EXISTS hstore WITH SCHEMA public;
+-- CREATE EXTENSION IF NOT EXISTS hstore WITH SCHEMA public;
 
 
 --
 -- Name: EXTENSION hstore; Type: COMMENT; Schema: -; Owner:
 --
 
-COMMENT ON EXTENSION hstore IS 'data type for storing sets of (key, value) pairs';
+-- COMMENT ON EXTENSION hstore IS 'data type for storing sets of (key, value) pairs';
 
 
 --
 -- Name: pg_trgm; Type: EXTENSION; Schema: -; Owner:
 --
 
-CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
+-- CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;
 
 
 --
 -- Name: EXTENSION pg_trgm; Type: COMMENT; Schema: -; Owner:
 --
 
-COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
+-- COMMENT ON EXTENSION pg_trgm IS 'text similarity measurement and index searching based on trigrams';
 
-
-SET default_tablespace = '';
-
-SET default_with_oids = false;
 
 --
 -- Name: application; Type: TABLE; Schema: public; Owner: chirpstack_as
@@ -777,8 +774,8 @@ migrate_gw_stats	2019-11-08 02:38:11.214972+00
 --
 
 COPY public.device (dev_eui, created_at, updated_at, application_id, device_profile_id, name, description, last_seen_at, device_status_battery, device_status_margin, latitude, longitude, altitude, device_status_external_power_source, dr, variables, tags) FROM stdin;
-\\x0000000000000555	2019-11-08 02:46:11.323242+00	2019-11-08 02:46:11.323242+00	1	9e89a1f2-fbbf-46fa-840d-73f238053bbd	device_otaa	device_otaa	\N	\N	\N	\N	\N	\N	f	\N
-\\x0000000000000666	2019-11-08 02:48:03.579549+00	2019-11-08 02:48:03.579549+00	1	c1671da1-726a-4259-868a-e8472f0f8b59	device_abp	device_abp	\N	\N	\N	\N	\N	\N	f	\N
+\\x0000000000000555	2019-11-08 02:46:11.323242+00	2019-11-08 02:46:11.323242+00	1	9e89a1f2-fbbf-46fa-840d-73f238053bbd	device_otaa	device_otaa	\N	\N	\N	\N	\N	\N	f	\N	\N	\N
+\\x0000000000000666	2019-11-08 02:48:03.579549+00	2019-11-08 02:48:03.579549+00	1	c1671da1-726a-4259-868a-e8472f0f8b59	device_abp	device_abp	\N	\N	\N	\N	\N	\N	f	\N	\N	\N
 \.
 
 
@@ -942,7 +939,7 @@ COPY public.multicast_group (id, created_at, updated_at, name, service_profile_i
 --
 
 COPY public.network_server (id, created_at, updated_at, name, server, ca_cert, tls_cert, tls_key, routing_profile_ca_cert, routing_profile_tls_cert, routing_profile_tls_key, gateway_discovery_enabled, gateway_discovery_interval, gateway_discovery_tx_frequency, gateway_discovery_dr) FROM stdin;
-1	2019-11-08 02:39:13.771113+00	2019-11-08 02:39:13.771113+00	ns	localhost:8000							f	0	0	0
+1	2019-11-08 02:39:13.771113+00	2019-11-08 02:39:13.771113+00	ns	127.0.0.1:8000							f	0	0	0
 \.
 
 
@@ -1002,7 +999,7 @@ a4d9d8ac-8b48-417b-843b-e68bc2e8baa0	1	1	2019-11-08 02:40:32.453436+00	2019-11-0
 --
 
 COPY public."user" (id, created_at, updated_at, username, password_hash, session_ttl, is_active, is_admin, email, note) FROM stdin;
-1	2019-11-08 02:38:09.678864+00	2019-11-08 02:38:09.678864+00	admin	PBKDF2$sha512$1$l8zGKtxRESq3PA2kFhHRWA==$H3lGMxOt55wjwoc+myeOoABofJY9oDpldJa7fhqdjbh700V6FLPML75UmBOt9J5VFNjAL1AvqCozA1HJM0QVGA==	0	t	t
+1	2019-11-08 02:38:09.678864+00	2019-11-08 02:38:09.678864+00	admin	PBKDF2$sha512$1$l8zGKtxRESq3PA2kFhHRWA==$H3lGMxOt55wjwoc+myeOoABofJY9oDpldJa7fhqdjbh700V6FLPML75UmBOt9J5VFNjAL1AvqCozA1HJM0QVGA==	0	t	t	jacob@conservify.org	
 \.
 
 

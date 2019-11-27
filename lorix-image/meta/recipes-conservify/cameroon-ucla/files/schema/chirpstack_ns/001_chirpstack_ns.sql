@@ -7,7 +7,6 @@
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -15,9 +14,7 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
-
 SET default_tablespace = '';
-
 SET default_with_oids = false;
 
 --
@@ -480,7 +477,7 @@ stats_migration_flush_gw_cache	2019-11-08 02:38:13.906805+00
 --
 
 COPY public.device (dev_eui, created_at, updated_at, device_profile_id, service_profile_id, routing_profile_id, skip_fcnt_check, reference_altitude, mode) FROM stdin;
-\\x0000000000000555	2019-11-08 02:46:11.335025+00	2019-11-08 02:46:11.335025+00	9e89a1f2-fbbf-46fa-840d-73f238053bbd	a4d9d8ac-8b48-417b-843b-e68bc2e8baa0	6d5db27e-4ce2-4b2b-b5d7-91f069397978	f	0
+\\x0000000000000555	2019-11-08 02:46:11.335025+00	2019-11-08 02:46:11.335025+00	9e89a1f2-fbbf-46fa-840d-73f238053bbd	a4d9d8ac-8b48-417b-843b-e68bc2e8baa0	6d5db27e-4ce2-4b2b-b5d7-91f069397978	f	0	
 \\x0000000000000666	2019-11-08 02:48:03.588386+00	2019-11-08 02:48:36.338554+00	c1671da1-726a-4259-868a-e8472f0f8b59	a4d9d8ac-8b48-417b-843b-e68bc2e8baa0	6d5db27e-4ce2-4b2b-b5d7-91f069397978	t	0	A
 \.
 
@@ -614,7 +611,7 @@ COPY public.multicast_queue (id, created_at, schedule_at, emit_at_time_since_gps
 --
 
 COPY public.routing_profile (created_at, updated_at, routing_profile_id, as_id, ca_cert, tls_cert, tls_key) FROM stdin;
-2019-11-08 02:39:13.779757+00	2019-11-08 02:39:13.779757+00	6d5db27e-4ce2-4b2b-b5d7-91f069397978	localhost:8001
+2019-11-08 02:39:13.779757+00	2019-11-08 02:39:13.779757+00	6d5db27e-4ce2-4b2b-b5d7-91f069397978	localhost:8001			
 \.
 
 
