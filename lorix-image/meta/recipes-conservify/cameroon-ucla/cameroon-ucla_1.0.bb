@@ -41,4 +41,7 @@ do_install() {
 	install -d ${D}/etc/rc5.d
 	cd ${D}/etc/rc5.d
 	ln -s ../init.d/conservify-startup S10conservify-startup
+
+	install -d ${D}/etc/logrotate.d
+	install -m 0644 ${S}/logrotations ${D}/etc/logrotate.d/logrotations
 }

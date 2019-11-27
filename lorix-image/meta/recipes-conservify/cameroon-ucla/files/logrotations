@@ -1,0 +1,34 @@
+# These are on a volatile partition, but just in case.
+
+/var/log/syslog {
+        daily
+        size 1M
+        rotate 2
+        compress
+        delaycompress
+        missingok
+        notifempty
+        create 644 root root
+}
+
+/var/log/messages {
+        daily
+        size 1M
+        rotate 2
+        compress
+        delaycompress
+        missingok
+        notifempty
+        create 644 root root
+}
+
+/var/log/redis.log {
+        daily
+        size 1M
+        rotate 2
+        compress
+        delaycompress
+        missingok
+        notifempty
+        create 644 root root
+}
