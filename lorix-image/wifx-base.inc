@@ -70,12 +70,12 @@ inherit extrausers
 
 # Add admin user in sudoers group
 update_sudoers(){
-    sed -i 's/# %sudo/%sudo/' ${IMAGE_ROOTFS}/etc/sudoers
+    sed -i 's/# %sudo.*/%sudo ALL=(ALL) NOPASSWD: ALL/' ${IMAGE_ROOTFS}/etc/sudoers
 }
 ROOTFS_POSTPROCESS_COMMAND += "update_sudoers;"
 
-# Disable shell access for root and create the admin main user
+# Create the admin main user
 EXTRA_USERS_PARAMS = " \
-    useradd -p '\$1\$OrJYw4GK\$z39VfXDWPb0IENfzDr7GM.' admin; \
+    useradd -p '\$1\$7yCVHKVM\$O1Y5Ef1LTurwyWrBPVBum/' admin; \
     usermod -a -G sudo admin; \
     "
