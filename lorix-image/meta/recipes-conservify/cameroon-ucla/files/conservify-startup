@@ -45,6 +45,8 @@ function do_start {
 	fi
 
 	do_migrate
+
+	/opt/conservify/bin/update-gw.sh
 }
 
 case "$1" in

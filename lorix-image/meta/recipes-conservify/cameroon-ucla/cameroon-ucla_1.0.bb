@@ -12,7 +12,7 @@ SRC_URI = " \
 S = "${WORKDIR}"
 
 PACKAGES = "${PN}"
-FILES_${PN} = "/etc /home/${USER}/.ssh/id_rsa /home/${USER}/.ssh/id_rsa.pub /home/${USER}/.ssh/authorized_keys"
+FILES_${PN} = "/etc /opt/conservify /home/${USER}/.ssh/id_rsa /home/${USER}/.ssh/id_rsa.pub /home/${USER}/.ssh/authorized_keys"
 
 USER = "admin"
 
@@ -25,11 +25,13 @@ do_install() {
 	install -d ${D}/etc/chirpstack-network-server
 	install -m 0644 ${S}/chirpstack-network-server.toml ${D}/etc/chirpstack-network-server/chirpstack-network-server.toml
 
-	install -d ${D}/home/${USER}/.ssh
-	install -m 0700 ${S}/id_rsa ${D}/home/${USER}/.ssh/
-    install -m 0755 ${S}/id_rsa.pub ${D}/home/${USER}/.ssh/
-	install -m 0755 ${S}/authorized_keys ${D}/home/${USER}/.ssh/authorized_keys
+	install --owner=1000 -d ${D}/home/${USER}/.ssh
+	install --owner=1000 -m 0600 ${S}/id_rsa ${D}/home/${USER}/.ssh/
+    install --owner=1000 -m 0644 ${S}/id_rsa.pub ${D}/home/${USER}/.ssh/
+	install --owner=1000 -m 0644 ${S}/authorized_keys ${D}/home/${USER}/.ssh/authorized_keys
 
+	install -d ${D}/opt/conservify/bin
+    install -m 0755 ${S}/update-gw.sh ${D}/opt/conservify/bin
 
 	install -d ${D}/etc/init.d
 	install -m 0755 ${S}/conservify-startup ${D}/etc/init.d/conservify-startup
