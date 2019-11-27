@@ -36,6 +36,9 @@ function do_migrate {
 }
 
 function do_start {
+	# HACK Unclear to me how to fix this in the image construction.
+	chown -R admin. ~admin/.ssh
+
 	if [ ! -f /var/lib/postgresql/data/pg_hba.conf ]; then
 		/usr/bin/postgresql-setup initdb
 
