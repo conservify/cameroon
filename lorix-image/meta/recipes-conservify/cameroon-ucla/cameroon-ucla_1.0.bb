@@ -31,7 +31,9 @@ do_install() {
 	install --owner=1000 -m 0644 ${S}/authorized_keys ${D}/home/${USER}/.ssh/authorized_keys
 
 	install -d ${D}/opt/conservify/bin
-    install -m 0755 ${S}/update-gw.sh ${D}/opt/conservify/bin
+	for f in ${S}/bin/*; do
+		install -m 0755 $f ${D}/opt/conservify/bin
+	done
 
 	install -d ${D}/etc/init.d
 	install -m 0755 ${S}/conservify-startup ${D}/etc/init.d/conservify-startup

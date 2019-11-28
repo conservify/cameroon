@@ -1,0 +1,4 @@
+#!/bin/bash
+
+alias ll='ls -alh --color=always'
+alias pg='sudo -u postgres psql'
