@@ -36,4 +36,10 @@ ADD --chown=worker:worker wifx-base.inc meta-wifx/recipes-wifx/images/wifx-base.
 ADD --chown=worker:worker build.sh /home/worker
 ADD --chown=worker:worker meta conservify
 
+ADD --chown=worker:worker meta-wifx.patch /home/worker/yocto/meta-wifx
+RUN cd /home/worker/yocto/meta-wifx && git apply meta-wifx.patch
+
+ADD --chown=worker:worker meta-golang.patch /home/worker/yocto/golang/meta-golang
+RUN cd /home/worker/yocto/golang/meta-golang && git apply meta-golang.patch
+
 WORKDIR /home/worker

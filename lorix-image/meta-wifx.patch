@@ -1,0 +1,13 @@
+diff --git a/recipes-bsp/u-boot/u-boot-at91_2017.03.bb b/recipes-bsp/u-boot/u-boot-at91_2017.03.bb
+index d1b7562..ce40b9b 100644
+--- a/recipes-bsp/u-boot/u-boot-at91_2017.03.bb
++++ b/recipes-bsp/u-boot/u-boot-at91_2017.03.bb
+@@ -3,7 +3,7 @@ require u-boot-atmel.inc
+ LICENSE = "GPLv2+"
+ LIC_FILES_CHKSUM = "file://README;beginline=1;endline=22;md5=2687c5ebfd9cb284491c3204b726ea29"
+ 
+-SRCREV = "${AUTOREV}"
++SRCREV = "359e61e2bd65b217594871c7abf682912c4d9a46"
+ 
+ PV = "v2017.03-at91+git${SRCPV}"
+ 
