@@ -1,6 +1,6 @@
 FROM ubuntu:16.04
 
-RUN apt-get update && apt-get -y install gawk wget git-core \
+RUN apt-get update && apt-get -y install gawk wget git-core vim \
     diffstat unzip texinfo gcc-multilib build-essential \
     chrpath socat cpio python python3 python3-pip \
     python3-pexpect xz-utils debianutils iputils-ping \
