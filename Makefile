@@ -1,7 +1,7 @@
 BUILD := build
 TEST_SOURCE := postgres://loraserver_as_data:asdfasdf@192.168.0.30/loraserver_as_data
 TEST_DESTINATION := postgres://lora-combined:asdfasdf@127.0.0.1/lora-combined?sslmode=disable
-PI := 192.168.0.159
+PI := 192.168.0.125
 
 all: binaries lorix-image pi-image
 
@@ -80,7 +80,6 @@ pi-image: pi-docker
 	docker run --rm --name pi-image-build \
 		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build/tmp/deploy/images \
 		--mount type=bind,source=`pwd`/build/sysroots,target=/home/worker/yocto/poky/build/tmp/sysroots \
-		--mount type=bind,source=`pwd`/build/work,target=/home/worker/yocto/poky/build/tmp/work \
 		--mount source=yocto-downloads,target=/home/worker/yocto/poky/build/downloads \
 		--mount source=yocto-sstate-cache,target=/home/worker/yocto/poky/build/sstate-cache \
 		pi-image-build ./build.sh
