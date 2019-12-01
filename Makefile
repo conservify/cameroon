@@ -58,6 +58,7 @@ lorix-image: lorix-keys lorix-docker
 	mkdir -p `pwd`/build/work
 	mkdir -p `pwd`/build/sysroots
 	rm -rf `pwd`/build/images/lorix-rootfs
+	touch lorix-image/meta/recipes-conservify/cameroon-ucla/cameroon-ucla_1.0.bb
 	docker run --rm --name lorix-image-build \
 		--mount type=bind,source=`pwd`/build/images,target=/home/worker/yocto/poky/build-wifx/tmp/deploy/images \
 		--mount type=bind,source=`pwd`/build/sysroots,target=/home/worker/yocto/poky/build-wifx/tmp/sysroots \
