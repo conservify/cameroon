@@ -7,6 +7,8 @@ all: binaries lorix-image pi-image
 
 binaries: $(BUILD)/db-sync $(BUILD)/db-read $(BUILD)/db-maintain
 
+arm-binaries: $(BUILD)/arm/db-sync $(BUILD)/arm/db-read $(BUILD)/arm/db-maintain
+
 clean:
 	rm -rf $(BUILD)
 
@@ -19,17 +21,6 @@ $(BUILD)/db-sync: db-sync/*.go
 $(BUILD)/db-read: db-read/*.go
 	go build -o $@ $^
 
-test-sync: binaries
-	$(BUILD)/db-sync --source $(TEST_SOURCE) --destination $(TEST_DESTINATION)
-
-test-read: binaries
-	$(BUILD)/db-read --url $(TEST_DESTINATION)
-
-collector-build:
-	rsync -vua --progress collector $(BUILD)
-
-arm-tools: $(BUILD)/arm/db-sync $(BUILD)/arm/db-read $(BUILD)/arm/db-maintain
-
 $(BUILD)/arm/db-sync: db-sync/*.go
 	env GOOS=linux GOARCH=arm go build -o $@ $^
 
@@ -39,11 +30,20 @@ $(BUILD)/arm/db-read: db-read/*.go
 $(BUILD)/arm/db-maintain: db-maintain/*.go
 	env GOOS=linux GOARCH=arm go build -o $@ $^
 
-update-collector: collector-build arm-tools
+test-sync: binaries
+	$(BUILD)/db-sync --source $(TEST_SOURCE) --destination $(TEST_DESTINATION)
+
+test-read: binaries
+	$(BUILD)/db-read --url $(TEST_DESTINATION)
+
+collector-build:
+	rsync -vua --progress collector $(BUILD)
+
+update-collector: collector-build arm-binaries
 	rsync -vua $(BUILD)/arm/* $(BUILD)/collector
 	rsync -vua --progress $(BUILD)/collector pi@$(PI):
 
-lorix-docker: arm-tools
+lorix-docker: arm-binaries
 	rsync -vua $(BUILD)/arm/* lorix-image/meta/recipes-conservify/cameroon-ucla/files/bin
 	cd lorix-image && docker build --rm -t lorix-image-build .
 
@@ -67,7 +67,7 @@ lorix-image: lorix-keys lorix-docker
 		--mount source=yocto-sstate-cache,target=/home/worker/yocto/poky/build-wifx/sstate-cache \
 		lorix-image-build ./build.sh
 
-pi-docker: arm-tools
+pi-docker: arm-binaries
 	cd pi-image && docker build --rm -t pi-image-build .
 
 pi-image: pi-docker
