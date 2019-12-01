@@ -1,0 +1,13 @@
+github.com/conservify/sqlxcache v0.0.0-20190613231538-4c025edbc64e h1:yl9wABoHJ9Gw3QwgK7Ro6MiG/f1ApH27DaFMZDBqgT8=
+github.com/conservify/sqlxcache v0.0.0-20190613231538-4c025edbc64e/go.mod h1:AvDsSXCHyWu5U4RKziUjN4WbWZgL3asecW+jQBXn/k0=
+github.com/fieldkit/data-protocol v0.0.0-20191030143150-63cf11326d0d h1:vO+LSVvVYE046dRKeqPiJ6q5DkI39IbITTtCThEiZSA=
+github.com/fieldkit/data-protocol v0.0.0-20191030143150-63cf11326d0d/go.mod h1:V84PpA6hUIiJoEDtWPaIGG5asd6cfYTJvSWHThD4YQE=
+github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
+github.com/golang/protobuf v1.3.2 h1:6nsPYzhq5kReh6QImI3k5qWzO4PEbvbIW2cwSfR/6xs=
+github.com/golang/protobuf v1.3.2/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
+github.com/jmoiron/sqlx v1.2.0 h1:41Ip0zITnmWNR/vHV+S4m+VoUivnWY5E4OJfLZjCJMA=
+github.com/jmoiron/sqlx v1.2.0/go.mod h1:1FEQNm3xlJgrMD+FBdI9+xvCksHtbpVBBw5dYhBSsks=
+github.com/lib/pq v1.0.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
+github.com/lib/pq v1.2.0 h1:LXpIM/LZ5xGFhOpXAQUIMM1HdyqzVYM13zNdjCEEcA0=
+github.com/lib/pq v1.2.0/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
+github.com/mattn/go-sqlite3 v1.9.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
