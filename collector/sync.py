@@ -10,6 +10,7 @@ import json
 import time
 import tempfile
 import shutil
+import csv
 
 import psycopg2
 import psycopg2.extras
@@ -89,7 +90,7 @@ class Synchronizer(Worker):
                 try:
                     self.status("%s syncing %s" % (local_summary_before, table))
                     logging.info("querying %s" % (table))
-                    query.execute("SELECT * FROM %s" % (table))
+                    query.execute("SELECT * FROM %s ORDER BY received_at DESC" % (table))
 
                     num_fields = len(query.description)
                     names = [c.name for c in query.description]
@@ -208,12 +209,48 @@ class Monitor(Worker):
     def local_backup(self, mp):
         subprocess.call(["rsync", "-vua", "--delete", mp + "/", "/tmp/backup/"])
 
-class Exporter:
+class Exporter(Worker):
     def __init__(self, options, status):
         self.options = options
         self.status = status
 
+    def work(self):
+        self.export("./")
+
     def export(self, path):
-        fn = time.strftime("lora_%Y%m%d_%H%M%S.csv")
-        with open(os.path.join(path, fn), 'w') as f:
-            f.write('HELLO\n')
+        db = psycopg2.connect(self.options.destiny)
+
+        tables = ["device_up", "device_ack", "device_join", "device_location", "device_status", "device_error"]
+
+        for table in tables:
+            ts = time.strftime("%Y%m%d_%H%M%S")
+            fn = "lora_" + table + "_" + ts + ".csv"
+            with open(os.path.join(path, fn), 'w') as f:
+                writer = csv.writer(f, delimiter='\t', quoting=csv.QUOTE_MINIMAL)
+
+                query = db.cursor()
+                try:
+                    self.status("exporting %s" % (table,))
+
+                    query.execute("SELECT * FROM %s ORDER BY received_at DESC" % (table,))
+
+                    num_fields = len(query.description)
+                    names = [c.name for c in query.description]
+
+                    writer.writerow(names)
+
+                    nrows = 0
+                    for row in query.fetchall():
+                        writer.writerow([self.translate_column(column) for column in row])
+                        nrows += 1
+
+                    logging.info("done after %d rows" % (nrows,))
+                finally:
+                    query.close()
+
+        self.status("done exporting!")
+
+    def translate_column(self, column):
+        if isinstance(column, memoryview):
+            return column.tobytes().hex()
+        return column
