@@ -12,13 +12,11 @@ SRC_URI = " \
 S = "${WORKDIR}"
 
 PACKAGES = "${PN}"
-FILES_${PN} = "/etc /usr/bin /home/${USER}/.ssh/id_rsa /home/${USER}/.ssh/id_rsa.pub /home/${USER}/.ssh/authorized_keys"
+FILES_${PN} = "/etc /usr/bin /root/.ssh /home/admin/.ssh/id_rsa /home/admin/.ssh/id_rsa.pub /home/admin/.ssh/authorized_keys"
 
 # Quick hack on my part.
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
 INHIBIT_PACKAGE_STRIP = "1"
-
-USER = "admin"
 
 do_compile() {
 }
@@ -29,10 +27,15 @@ do_install() {
 	install -d ${D}/etc/chirpstack-network-server
 	install -m 0644 ${S}/chirpstack-network-server.toml ${D}/etc/chirpstack-network-server/chirpstack-network-server.toml
 
-	install --owner=1000 -d ${D}/home/${USER}/.ssh
-	install --owner=1000 -m 0600 ${S}/id_rsa ${D}/home/${USER}/.ssh/
-	install --owner=1000 -m 0644 ${S}/id_rsa.pub ${D}/home/${USER}/.ssh/
-	install --owner=1000 -m 0644 ${S}/authorized_keys ${D}/home/${USER}/.ssh/authorized_keys
+	install -d ${D}/root/.ssh
+	install -m 0600 ${S}/id_rsa ${D}/root/.ssh/
+	install -m 0644 ${S}/id_rsa.pub ${D}/root/.ssh/
+	install -m 0644 ${S}/authorized_keys ${D}/root/.ssh/authorized_keys
+
+	install --owner=1000 -d ${D}/home/admin/.ssh
+	install --owner=1000 -m 0600 ${S}/id_rsa ${D}/home/admin/.ssh/
+	install --owner=1000 -m 0644 ${S}/id_rsa.pub ${D}/home/admin/.ssh/
+	install --owner=1000 -m 0644 ${S}/authorized_keys ${D}/home/admin/.ssh/authorized_keys
 
 	install -d ${D}/usr/bin
 	for f in ${S}/bin/*; do
