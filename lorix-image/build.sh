@@ -12,7 +12,7 @@ set -x
 
 sed -i 's/BB_NO_NETWORK = "0"/BB_NO_NETWORK = "1"/' conf/local.conf
 
-cp /home/worker/yocto/meta-wifx/recipes-bsp/u-boot/u-boot-at91_2017.03.bb tmp/deploy/images
+time bitbake -c clean cameroon-ucla
 
 time bitbake wifx-base
 
