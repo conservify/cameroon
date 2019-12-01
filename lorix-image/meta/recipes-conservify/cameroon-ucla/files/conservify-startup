@@ -49,7 +49,7 @@ function do_start {
 
 	do_migrate
 
-	/opt/conservify/bin/update-gw.sh
+	/usr/bin/update-gw.sh
 }
 
 case "$1" in
