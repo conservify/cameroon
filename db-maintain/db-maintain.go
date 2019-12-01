@@ -43,7 +43,7 @@ func (m *Maintainer) Maintain(o *Options) error {
 	tables := []string{"device_up", "device_ack", "device_join", "device_location", "device_status", "device_error"}
 
 	for _, table := range tables {
-		err := m.ShrinkTable(db, table, o.Delete, int32(o.MaximumSize))
+		err := m.ShrinkTable(db, table, o)
 		if err != nil {
 			return err
 		}
@@ -52,10 +52,10 @@ func (m *Maintainer) Maintain(o *Options) error {
 	return nil
 }
 
-func (m *Maintainer) ShrinkTable(db *sql.DB, table string, delete bool, maximumSize int32) error {
+func (m *Maintainer) ShrinkTable(db *sql.DB, table string, o *Options) error {
 	for {
-		size := int32(0)
-		rows := int32(0)
+		size := 0
+		rows := 0
 		err := db.QueryRow(fmt.Sprintf("SELECT pg_total_relation_size('%s') AS size, COUNT(*) AS rows FROM %s", table, table)).Scan(&size, &rows)
 		if err != nil {
 			return err
@@ -63,11 +63,11 @@ func (m *Maintainer) ShrinkTable(db *sql.DB, table string, delete bool, maximumS
 
 		log.Printf("%s table size = %v, rows = %v\n", table, size, rows)
 
-		if size < maximumSize {
+		if size < o.MaximumSize {
 			return nil
 		}
 
-		nrows, err := m.ShrinkTableOnce(db, table, delete)
+		nrows, err := m.ShrinkTableOnce(db, table, o)
 		if err != nil {
 			return err
 		}
@@ -76,7 +76,7 @@ func (m *Maintainer) ShrinkTable(db *sql.DB, table string, delete bool, maximumS
 			return nil
 		}
 
-		if !delete {
+		if !o.Delete {
 			return nil
 		}
 	}
@@ -84,7 +84,7 @@ func (m *Maintainer) ShrinkTable(db *sql.DB, table string, delete bool, maximumS
 	return nil
 }
 
-func (m *Maintainer) ShrinkTableOnce(db *sql.DB, table string, delete bool) (int32, error) {
+func (m *Maintainer) ShrinkTableOnce(db *sql.DB, table string, o *Options) (int32, error) {
 	tx, err := db.Begin()
 	if err != nil {
 		return 0, err
@@ -118,13 +118,17 @@ func (m *Maintainer) ShrinkTableOnce(db *sql.DB, table string, delete bool) (int
 		return nrows, err
 	}
 
-	fn := fmt.Sprintf("%s_%s.csv", table, date)
+	if fi, err := os.Stat(o.ArchivePath); err != nil || !fi.IsDir() {
+		return nrows, fmt.Errorf("archive path is missing: %s", o.ArchivePath)
+	}
+
+	fn := fmt.Sprintf("%s/%s_%s.csv", o.ArchivePath, table, date)
 	err = m.ExportToCSV(rows, fn)
 	if err != nil {
 		return nrows, err
 	}
 
-	if delete {
+	if o.Delete {
 		_, err := db.Query(fmt.Sprintf(`DELETE FROM %s WHERE date_trunc('month', received_at) = $1`, table), date)
 		if err != nil {
 			return nrows, err
@@ -219,7 +223,7 @@ func main() {
 	flag.BoolVar(&o.Delete, "delete", false, "delete")
 
 	flag.StringVar(&o.DatabaseURL, "database", "", "database")
-	flag.StringVar(&o.ArchivePath, "archive", "", "archive")
+	flag.StringVar(&o.ArchivePath, "archive", "./", "archive")
 
 	flag.IntVar(&o.MaximumSize, "size", 0, "size")
 
