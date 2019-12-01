@@ -1,3 +1,5 @@
+create extension hstore;
+
 create table device_up (
 	id uuid primary key,
 	received_at timestamp with time zone not null,
