@@ -35,7 +35,7 @@ class App:
 
         main_buttons = [
             wm.Button("Sync", self.sync, (50, 97, 255)),
-            wm.Button("Export", self.export, (50, 97, 255)),
+            wm.Button("Logs", self.logs),
             wm.Button("Restart", self.restart),
             wm.Button("Tools", self.tools),
         ]
@@ -43,7 +43,7 @@ class App:
         tools_buttons = [
             wm.Button("Back/Home", self.home),
             wm.Button("Restart", self.restart),
-            wm.Button("Logs", self.logs),
+            wm.Button("Export", self.export, (50, 97, 255)),
             wm.Button("Reboot", self.reboot, (255, 0, 0)),
         ]
 
