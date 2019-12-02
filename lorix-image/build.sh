@@ -6,13 +6,13 @@ pushd yocto/poky
 
 pwd
 
+find build-wifx/sstate-cache -name "*cameroon*" -delete
+
 set +x
 source oe-init-build-env build-wifx
 set -x
 
 sed -i 's/BB_NO_NETWORK = "0"/BB_NO_NETWORK = "1"/' conf/local.conf
-
-time bitbake -c clean cameroon-ucla
 
 time bitbake wifx-base
 
