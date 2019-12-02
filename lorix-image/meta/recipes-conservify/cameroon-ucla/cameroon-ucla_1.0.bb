@@ -60,6 +60,8 @@ do_install() {
 	install -m 0644 ${S}/logrotations ${D}/etc/logrotate.d/logrotations
 
 	install -d ${D}/etc/conservify-schema
+	install -m 0644 ${S}/pg/pg_hba.conf ${D}/etc/conservify-schema/
+	install -m 0644 ${S}/pg/postgresql.conf ${D}/etc/conservify-schema/
 
 	install -d ${D}/etc/conservify-schema/postgres
 	for f in ${S}/schema/postgres/*.sql; do

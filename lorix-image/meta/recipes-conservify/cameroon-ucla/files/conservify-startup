@@ -42,12 +42,8 @@ function do_start {
 	if [ ! -f /var/lib/postgresql/data/pg_hba.conf ]; then
 		/usr/bin/postgresql-setup initdb
 
-		echo 'host    all             all             127.0.0.1/32            md5' >> /var/lib/postgresql/data/pg_hba.conf
-		echo 'host    all             all             192.168.1.0/24          md5' >> /var/lib/postgresql/data/pg_hba.conf
-
-		sed -i "s/#listen_addresses.*/listen_addresses = '*'/g" /var/lib/postgresql/data/postgresql.conf
-
-		sed -i ''
+		cp /etc/conservify-schema/pg_hba.conf /var/lib/postgresql/data/pg_hba.conf
+		cp /etc/conservify-schema/postgresql.conf /var/lib/postgresql/data/postgresql.conf
 
 		/etc/init.d/postgresql-server start
 	fi
